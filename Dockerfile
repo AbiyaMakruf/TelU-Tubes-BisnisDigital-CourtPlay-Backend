@@ -1,27 +1,39 @@
-FROM python:3.10-slim
+# Gunakan base image dengan CUDA runtime + Ubuntu 22.04
+FROM nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
 
+# Tentukan working directory
 WORKDIR /app
 
-# 1. INSTALL DEPENDENSI SISTEM UNTUK OPENCV/YOLO
-# libglib2.0-0 menyediakan libgthread-2.0.so.0
-# libgl1, libsm6, libxext6 adalah dependensi visualisasi umum untuk OpenCV
+# Install dependensi sistem umum
 RUN apt-get update && apt-get install -y \
-    libglib2.0-0 \
+    python3 python3-pip \
     libgl1 \
     libsm6 \
     libxext6 \
     ffmpeg \
+    libjpeg-dev \
+    libpng-dev \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PORT 8080
-ENV PYTHONUNBUFFERED 1
+# Pastikan Python default ke versi 3
+RUN ln -sf python3 /usr/bin/python
 
-# 2. INSTALL DEPENDENSI PYTHON
+# Set environment agar CUDA bisa diakses
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
+ENV PORT=8080
+ENV PYTHONUNBUFFERED=1
+
+# Copy dan install requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 3. SALIN APLIKASI
+# (Opsional) Pastikan torch GPU terinstall
+RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+
+# Copy seluruh kode aplikasi
 COPY app/ ./app
 
-# 4. START SERVER
+# Jalankan aplikasi FastAPI
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
