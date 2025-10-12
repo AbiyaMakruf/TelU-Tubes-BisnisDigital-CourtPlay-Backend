@@ -1,4 +1,4 @@
-name: Build and Push to Google Artifact Registry
+name: Build and Push to Artifact Registry
 
 on:
   push:
@@ -13,13 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1️⃣ Buat file kredensial dulu
+      # ✅ Simpan JSON key secara literal
       - name: Create GCP credentials file
         run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > $HOME/gcp-key.json
+          echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
-      # 2️⃣ Setup gcloud dan aktifkan service account
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
@@ -27,18 +26,15 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      # 3️⃣ Auth docker untuk Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-      # 4️⃣ Build image
       - name: Build Docker image
         run: |
           docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest .
 
-      # 5️⃣ Push image
       - name: Push Docker image
         run: |
           docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest
