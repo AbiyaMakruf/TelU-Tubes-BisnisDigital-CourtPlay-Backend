@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+google-cloud-storage
+ultralytics
+opencv-python-headless
+numpy
+supabase
+python-dotenv
+psycopg2
+smtplib
