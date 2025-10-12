@@ -64,7 +64,7 @@ def infer_video(payload: InferenceRequest):
         username, email = get_user_info(user_id)
         project_name, project_details_id_actual = get_project_info(project_id)
         # Ambil link video asli dari Supabase
-        link_original_video = get_link_original_video(project_details_id)['link_original_video']
+        link_original_video = get_link_original_video(project_details_id)['link_video_original']
         
         # 3. Download dan Ekstraksi
         download_original_video(bucket_name, user_id, project_id, link_original_video)
@@ -90,17 +90,26 @@ def infer_video(payload: InferenceRequest):
         link_video_object_detection = upload_video(bucket_name, "objectDetection", user_id, project_id, path_video_object_detection)
         link_video_keypoints = upload_video(bucket_name, "playerKeyPoint", user_id, project_id, path_video_player_key_point)
 
+
+        # To Do
+        ready_position_count ="NULL"
+        video_courtKeyPoint = "NULL"
+        image_heatmap_player = "NULL"
+
         # 6. Update Supabase dan Notifikasi
         if update_project_details(
             project_details_id, 
             link_video_object_detection, 
             link_video_keypoints, 
-            link_thumbnail, # Menggunakan link_thumbnail yang sudah di-upload
+            link_thumbnail,
             int(stroke_count['forehand']), 
             int(stroke_count['backhand']), 
             int(stroke_count['serve']), 
             int(duration_seconds), 
-            int(inference_time)
+            int(inference_time),
+            ready_position_count,
+            video_courtKeyPoint,
+            image_heatmap_player
         ):
             send_success_email(
                 username=username,
