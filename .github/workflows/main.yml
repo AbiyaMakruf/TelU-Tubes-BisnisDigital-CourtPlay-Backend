@@ -3,28 +3,23 @@ name: CI - Docker Build & Push to GCR
 on:
   push:
     branches:
-      - main # Trigger saat ada push ke branch 'main'
+      - main 
 
-# Variabel Lingkungan
+# Variabel Lingkungan Minimalis (Hanya untuk referensi path yang mudah)
 env:
   SERVICE_NAME: yolo-service
   GCR_HOST: gcr.io
-  GCP_REGION: us-central1 
   
-  # Ambil PROJECT_ID dari GitHub Secret
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+# Variabel yang digunakan untuk Build dan Push Image
+# Menggunakan sintaksis ekspresi penuh untuk menggabungkan Secrets
+# Image: gcr.io/PROJECT_ID/yolo-service:SHA
+vars:
   GCR_IMAGE: ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}
-  
-  # Variabel WIF (Workload Identity Federation)
-  # Ganti dengan nomor proyek dan SA email Anda
-  WIF_PROJECT_NUMBER: 345589430849 
-  WIF_SA_EMAIL: github-runner-sa@courtplay-analytics-474615.iam.gserviceaccount.com
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
     
-    # Izin diperlukan untuk mengambil identitas (WIF) dan checkout repo
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -37,8 +32,9 @@ jobs:
       - name: Authenticate Google Cloud Identity
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: projects/${{ env.WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: ${{ env.WIF_SA_EMAIL }}
+          # Mengakses Secrets untuk WIF config
+          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: ${{ secrets.SA_WIF_EMAIL }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
           
       # 2. Mengkonfigurasi Docker Credential Helper
@@ -46,15 +42,15 @@ jobs:
         run: gcloud auth configure-docker ${{ env.GCR_HOST }} --quiet
 
       # 3. Build Docker Image
-      # Tag image menggunakan SHA commit agar unik
       - name: Build Docker Image
-        run: docker build -t ${{ env.GCR_IMAGE }}:${{ github.sha }} .
+        # Menggunakan vars.GCR_IMAGE yang telah didefinisikan di atas
+        run: docker build -t ${{ vars.GCR_IMAGE }}:${{ github.sha }} .
           
       # 4. Push Image ke GCR
       - name: Push Docker Image to GCR
-        run: docker push ${{ env.GCR_IMAGE }}:${{ github.sha }}
+        run: docker push ${{ vars.GCR_IMAGE }}:${{ github.sha }}
 
       - name: Output Image Tag
         run: |
-          echo "Successfully pushed image: ${{ env.GCR_IMAGE }}:${{ github.sha }}"
+          echo "Successfully pushed image: ${{ vars.GCR_IMAGE }}:${{ github.sha }}"
           echo "Image is ready for manual deployment to Cloud Run."
