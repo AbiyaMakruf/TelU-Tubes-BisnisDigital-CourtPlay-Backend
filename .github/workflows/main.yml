@@ -1,0 +1,60 @@
+name: CI - Docker Build & Push to GCR
+
+on:
+  push:
+    branches:
+      - main # Trigger saat ada push ke branch 'main'
+
+# Variabel Lingkungan
+env:
+  SERVICE_NAME: yolo-service
+  GCR_HOST: gcr.io
+  GCP_REGION: us-central1 
+  
+  # Ambil PROJECT_ID dari GitHub Secret
+  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GCR_IMAGE: ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}
+  
+  # Variabel WIF (Workload Identity Federation)
+  # Ganti dengan nomor proyek dan SA email Anda
+  WIF_PROJECT_NUMBER: 345589430849 
+  WIF_SA_EMAIL: github-runner-sa@courtplay-analytics-474615.iam.gserviceaccount.com
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    # Izin diperlukan untuk mengambil identitas (WIF) dan checkout repo
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 1. Otentikasi ke Google Cloud (Menggunakan Workload Identity Federation)
+      - name: Authenticate Google Cloud Identity
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/${{ env.WIF_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+          service_account: ${{ env.WIF_SA_EMAIL }}
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          
+      # 2. Mengkonfigurasi Docker Credential Helper
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker ${{ env.GCR_HOST }} --quiet
+
+      # 3. Build Docker Image
+      # Tag image menggunakan SHA commit agar unik
+      - name: Build Docker Image
+        run: docker build -t ${{ env.GCR_IMAGE }}:${{ github.sha }} .
+          
+      # 4. Push Image ke GCR
+      - name: Push Docker Image to GCR
+        run: docker push ${{ env.GCR_IMAGE }}:${{ github.sha }}
+
+      - name: Output Image Tag
+        run: |
+          echo "Successfully pushed image: ${{ env.GCR_IMAGE }}:${{ github.sha }}"
+          echo "Image is ready for manual deployment to Cloud Run."
