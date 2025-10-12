@@ -1,4 +1,4 @@
-name: Build and Push to Artifact Registry
+name: Build, Push, and Deploy to Cloud Run
 
 on:
   push:
@@ -19,6 +19,7 @@ jobs:
           echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
+      # ✅ Setup GCloud
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
@@ -26,15 +27,32 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
+      # ✅ Configure Docker untuk Artifact Registry
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
+      # ✅ Build Docker image
       - name: Build Docker image
         run: |
           docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest .
 
+      # ✅ Push Docker image
       - name: Push Docker image
         run: |
           docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest
+
+      # 🚀 Auto Deploy ke Cloud Run (GPU L4)
+      - name: Deploy to Cloud Run (GPU)
+        run: |
+          gcloud run deploy courtplay-api-gpu \
+            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest \
+            --region=us-central1 \
+            --platform=managed \
+            --allow-unauthenticated \
+            --service-account=github-runner-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
+            --port=8080 \
+            --gpu=1 --gpu-type=nvidia-l4 \
+            --set-env-vars="SUPABASE_URL=${{ secrets.SUPABASE_URL }},SUPABASE_KEY=${{ secrets.SUPABASE_KEY }},MAILTRAP_TOKEN=${{ secrets.MAILTRAP_TOKEN }}"
+
