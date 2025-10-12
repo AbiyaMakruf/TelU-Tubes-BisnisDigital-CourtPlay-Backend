@@ -92,9 +92,9 @@ def infer_video(payload: InferenceRequest):
 
 
         # To Do
-        ready_position_count ="NULL"
-        video_courtKeyPoint = "NULL"
-        image_heatmap_player = "NULL"
+        ready_position_count =0
+        video_courtKeyPoint = "http://test"
+        image_heatmap_player = "http://test"
 
         # 6. Update Supabase dan Notifikasi
         if update_project_details(

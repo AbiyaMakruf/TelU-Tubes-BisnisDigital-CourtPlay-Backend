@@ -55,7 +55,7 @@ def update_project_details(project_details_id, video_objectDetection, video_play
     try:
         response = (
             supabase.table("project_details")
-            .update({"link_video_object_detection": video_objectDetection, 
+            .update({"link_video_object_detections": video_objectDetection, 
                      "link_video_player_keypoints": video_playerKeyPoint, 
                      "link_image_ball_droppings": images_ball_dropping, 
                      "forehand_count": forehand_count, 
