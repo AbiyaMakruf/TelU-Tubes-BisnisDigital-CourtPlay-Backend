@@ -11,10 +11,8 @@ env:
   GCR_HOST: gcr.io
   
 # Variabel yang digunakan untuk Build dan Push Image
-# Menggunakan sintaksis ekspresi penuh untuk menggabungkan Secrets
+# GCR_IMAGE didefinisikan secara implisit di dalam langkah run.
 # Image: gcr.io/PROJECT_ID/yolo-service:SHA
-vars:
-  GCR_IMAGE: ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}
 
 jobs:
   build-and-push:
@@ -43,14 +41,16 @@ jobs:
 
       # 3. Build Docker Image
       - name: Build Docker Image
-        # Menggunakan vars.GCR_IMAGE yang telah didefinisikan di atas
-        run: docker build -t ${{ vars.GCR_IMAGE }}:${{ github.sha }} .
+        # Menggunakan ekspresi lengkap sebagai ganti vars.GCR_IMAGE
+        run: docker build -t ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
           
       # 4. Push Image ke GCR
       - name: Push Docker Image to GCR
-        run: docker push ${{ vars.GCR_IMAGE }}:${{ github.sha }}
+        # Menggunakan ekspresi lengkap sebagai ganti vars.GCR_IMAGE
+        run: docker push ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
 
       - name: Output Image Tag
         run: |
-          echo "Successfully pushed image: ${{ vars.GCR_IMAGE }}:${{ github.sha }}"
+          # Menggunakan ekspresi lengkap sebagai ganti vars.GCR_IMAGE
+          echo "Successfully pushed image: ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
           echo "Image is ready for manual deployment to Cloud Run."
