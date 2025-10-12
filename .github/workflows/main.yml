@@ -24,14 +24,20 @@ jobs:
 
       # 3️⃣ Configure Docker agar bisa push ke GCR
       - name: Configure Docker for GCR
-        run: gcloud auth configure-docker asia.gcr.io --quiet
+        run: gcloud auth configure-docker asia-docker.pkg.dev --quiet
+
+      - name: Authenticate Docker
+        run: |
+          gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+          gcloud auth configure-docker asia-docker.pkg.dev --quiet
+
 
       # 4️⃣ Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/courtplay-api:latest .
+          docker build -t asia-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/courtplay-api:latest .
 
       # 5️⃣ Push ke Google Container Registry
       - name: Push Docker image
         run: |
-          docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/courtplay-api:latest
+          docker push asia-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/courtplay-api:latest
