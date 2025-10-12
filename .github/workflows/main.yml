@@ -1,56 +1,37 @@
-name: CI - Docker Build & Push to GCR
+name: Build and Push to Google Container Registry
 
 on:
   push:
-    branches:
-      - main 
-
-# Variabel Lingkungan Minimalis (Hanya untuk referensi path yang mudah)
-env:
-  SERVICE_NAME: yolo-service
-  GCR_HOST: gcr.io
-  
-# Variabel yang digunakan untuk Build dan Push Image
-# GCR_IMAGE didefinisikan secara implisit di dalam langkah run.
-# Image: gcr.io/PROJECT_ID/yolo-service:SHA
+    branches: [ main ]  # jalankan otomatis saat push ke branch main
+  workflow_dispatch:    # bisa dijalankan manual dari GitHub UI
 
 jobs:
-  build-and-push:
+  build:
     runs-on: ubuntu-latest
-    
-    permissions:
-      contents: 'read'
-      id-token: 'write'
 
     steps:
-      - name: Checkout Repository
+      # 1️⃣ Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 1. Otentikasi ke Google Cloud (Menggunakan Workload Identity Federation)
-      - name: Authenticate Google Cloud Identity
-        uses: google-github-actions/auth@v2
+      # 2️⃣ Setup Google Cloud SDK
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
         with:
-          # Mengakses Secrets untuk WIF config
-          workload_identity_provider: projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-pool/providers/github-provider
-          service_account: ${{ secrets.SA_WIF_EMAIL }}
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          
-      # 2. Mengkonfigurasi Docker Credential Helper
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      # 3️⃣ Configure Docker agar bisa push ke GCR
       - name: Configure Docker for GCR
-        run: gcloud auth configure-docker ${{ env.GCR_HOST }} --quiet
+        run: gcloud auth configure-docker asia.gcr.io --quiet
 
-      # 3. Build Docker Image
-      - name: Build Docker Image
-        # Menggunakan ekspresi lengkap sebagai ganti vars.GCR_IMAGE
-        run: docker build -t ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
-          
-      # 4. Push Image ke GCR
-      - name: Push Docker Image to GCR
-        # Menggunakan ekspresi lengkap sebagai ganti vars.GCR_IMAGE
-        run: docker push ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
-
-      - name: Output Image Tag
+      # 4️⃣ Build Docker image
+      - name: Build Docker image
         run: |
-          # Menggunakan ekspresi lengkap sebagai ganti vars.GCR_IMAGE
-          echo "Successfully pushed image: ${{ env.GCR_HOST }}/${{ secrets.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
-          echo "Image is ready for manual deployment to Cloud Run."
+          docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/courtplay-api:latest .
+
+      # 5️⃣ Push ke Google Container Registry
+      - name: Push Docker image
+        run: |
+          docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/courtplay-api:latest
