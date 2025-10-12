@@ -1,3 +1,16 @@
 ![CourtPlay Logo](README/CP_BE.png)
 
 ![Tech Stack](README/tech_stack.png)
+
+# Build Docker Local
+docker build -t us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/test-image:latest .
+
+# Run Docker Local
+docker run -it ^
+  -p 8080:8080 ^
+  -v "C:\Users\abiyamf\Documents\Bisnis Digital\TelU-Tubes-BisnisDigital-CourtPlay-Backend\courtplay-analytics-474615-92b2bbfdc547.json:/app/gcp-key.json" ^
+  -e GOOGLE_APPLICATION_CREDENTIALS="/app/gcp-key.json" ^
+  -e SUPABASE_URL="https://qqcxjwxphvqfiffwftpt.supabase.co" ^
+  -e SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." ^
+  -e MAILTRAP_TOKEN="ce9a293bbce7cd6e2140ec38f3c6a323" ^
+  us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/test-image:latest

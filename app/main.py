@@ -1,6 +1,7 @@
 import time
 import os
 import shutil
+import torch
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, UUID4
 
@@ -124,6 +125,38 @@ def infer_video(payload: InferenceRequest):
             shutil.rmtree(local_project_root_dir)
 
 
+def get_gpu_info():
+    """Mendeteksi ketersediaan dan tipe GPU."""
+    try:
+        if torch.cuda.is_available():
+            device_count = torch.cuda.device_count()
+            
+            # Mendapatkan nama GPU pertama
+            gpu_name = torch.cuda.get_device_name(0) 
+            
+            return {
+                "using_gpu": True,
+                "gpu_count": device_count,
+                "gpu_name": gpu_name
+            }
+        else:
+            return {
+                "using_gpu": False,
+                "detail": "CUDA device not found. Running on CPU."
+            }
+    except Exception as e:
+        # Menangani jika PyTorch tidak terinstal atau gagal inisialisasi CUDA
+        return {
+            "using_gpu": False,
+            "detail": f"GPU check failed (PyTorch not functional): {e}"
+        }
+
 @app.get("/")
 def health_check():
-    return {"status": "ok", "message": "Object Detection Service Running"}
+    gpu_status = get_gpu_info()
+    
+    return {
+        "status": "ok", 
+        "message": "Object Detection Service Running",
+        "hardware": gpu_status
+    }
