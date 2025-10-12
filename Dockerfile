@@ -27,10 +27,10 @@ ENV PYTHONUNBUFFERED=1
 
 # Copy dan install requirements
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 # (Opsional) Pastikan torch GPU terinstall
-RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126
+RUN pip install --break-system-packages torch torchvision --index-url https://download.pytorch.org/whl/cu126
 
 # Copy seluruh kode aplikasi
 COPY app/ ./app
