@@ -13,7 +13,7 @@ def get_link_original_video(project_details_id):
     try:
         response = (
             supabase.table("project_details")
-            .select("link_original_video")
+            .select("link_video_original")
             .eq("id", project_details_id)
             .single()
             .execute()
@@ -51,18 +51,21 @@ def get_project_info(project_id):
         print(f"Error getting project {project_id}: {e}")
         return None, None
 
-def update_project_details(project_details_id, video_objectDetection, video_playerKeyPoint, images_ball_dropping, forehand_count, backhand_count, serve_count, video_duration, video_processing_time):
+def update_project_details(project_details_id, video_objectDetection, video_playerKeyPoint, images_ball_dropping, forehand_count, backhand_count, serve_count, video_duration, video_processing_time,ready_position_count,video_courtKeyPoint,image_heatmap_player):
     try:
         response = (
             supabase.table("project_details")
-            .update({"link_video_object_detection": video_objectDetection, 
-                     "link_video_keypoints": video_playerKeyPoint, 
-                     "link_images_ball_droppings": images_ball_dropping, 
+            .update({"link_video_object_detections": video_objectDetection, 
+                     "link_video_player_keypoints": video_playerKeyPoint, 
+                     "link_image_ball_droppings": images_ball_dropping, 
                      "forehand_count": forehand_count, 
                      "backhand_count": backhand_count, 
-                     "serve_count": serve_count, 
+                     "serve_count": serve_count,
+                     "ready_position_count": ready_position_count,
                      "video_duration": video_duration, 
-                     "video_processing_time": video_processing_time, 
+                     "video_processing_time": video_processing_time,
+                     "link_video_court_keypoints": video_courtKeyPoint,
+                     "link_image_heatmap_player": image_heatmap_player,
                      "updated_at": "now()"})
             .eq("id", project_details_id)
             .execute()
@@ -76,7 +79,7 @@ def update_projects(project_id, thumbnail, status):
     try:
         response = (
             supabase.table("projects")
-            .update({"thumbnail": thumbnail,"is_mailed": status, "updated_at": "now()"})
+            .update({"link_image_thumbnail": thumbnail,"is_mailed": status, "updated_at": "now()"})
             .eq("id", project_id)
             .execute()
         )
