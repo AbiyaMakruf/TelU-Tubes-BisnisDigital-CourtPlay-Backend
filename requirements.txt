@@ -2,7 +2,8 @@ fastapi
 uvicorn
 google-cloud-storage
 ultralytics
-opencv-python-headless
+# opencv-python-headless
+opencv-python
 numpy
 supabase
 python-dotenv

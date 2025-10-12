@@ -2,6 +2,7 @@ from ultralytics import YOLO
 import os
 import cv2
 import shutil
+import traceback
 
 def convert_avi_to_mp4(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
@@ -50,13 +51,17 @@ def inference_objectDetection(user_id, project_id):
         )
 
         for result in results:
-            result.save()
+            result.save(filename="image.png")
         
         convert_avi_to_mp4(temp_avi_path, final_mp4_path)
         
         print(final_mp4_path)
         return final_mp4_path
-
+    
+    except Exception as e:
+        print("FATAL ERROR during processing:")
+        traceback.print_exc()
+        raise e
     finally:
         if os.path.exists(temp_yolo_output_dir):
             shutil.rmtree(temp_yolo_output_dir)
@@ -102,7 +107,7 @@ def inference_playerKeyPoint(user_id, project_id):
                 if class_name in stroke_counts:
                     stroke_counts[class_name] += 1
 
-            result.save()
+            result.save(filename="image.png")
         
         convert_avi_to_mp4(temp_avi_path, final_mp4_path)
         

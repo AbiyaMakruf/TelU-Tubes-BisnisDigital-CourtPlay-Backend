@@ -31,7 +31,7 @@ def extract_first_frame_as_thumbnail(video_path: str, thumbnail_dir: str) -> str
     # 1. Tentukan Path Output Thumbnail
     os.makedirs(thumbnail_dir, exist_ok=True)
     video_filename_base = os.path.basename(video_path).rsplit('.', 1)[0]
-    thumbnail_filename = f"{video_filename_base}_thumb.jpg"
+    thumbnail_filename = f"{video_filename_base}_thumb.png"
     thumbnail_path = os.path.join(thumbnail_dir, thumbnail_filename)
 
     cap = cv2.VideoCapture(video_path)

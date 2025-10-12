@@ -11,6 +11,6 @@ docker run -it ^
   -v "C:\Users\abiyamf\Documents\Bisnis Digital\TelU-Tubes-BisnisDigital-CourtPlay-Backend\courtplay-analytics-474615-92b2bbfdc547.json:/app/gcp-key.json" ^
   -e GOOGLE_APPLICATION_CREDENTIALS="/app/gcp-key.json" ^
   -e SUPABASE_URL="https://qqcxjwxphvqfiffwftpt.supabase.co" ^
-  -e SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." ^
+  -e SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxY3hqd3hwaHZxZmlmZndmdHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyMDg0NDAsImV4cCI6MjA3NTc4NDQ0MH0.ileKiwiqCwpBT0FGRxoyd9pAKrrluiH1xGjpsRxas5w" ^
   -e MAILTRAP_TOKEN="ce9a293bbce7cd6e2140ec38f3c6a323" ^
   us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/test-image:latest
