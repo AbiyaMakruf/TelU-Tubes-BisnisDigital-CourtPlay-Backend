@@ -6,11 +6,7 @@ RUN apt-get update && apt-get install -y \
     python3 python3-pip \
     libgl1 libglib2.0-0 libsm6 libxext6 libxrender1 \
     ffmpeg \
-    libjpeg8 \
-    libpng-dev \
-    libtiff6 \
-    libwebp-dev \
-    libopenjp2-7-dev \
+    libjpeg8 libpng-dev libtiff6 libwebp-dev libopenjp2-7-dev \
     libavcodec-dev libavformat-dev libswscale-dev libv4l-dev \
     build-essential \
     && rm -rf /var/lib/apt/lists/*

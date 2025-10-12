@@ -3,29 +3,35 @@ import os
 import cv2
 import shutil
 import traceback
+import subprocess
 
 def convert_avi_to_mp4(input_path, output_path):
-    cap = cv2.VideoCapture(input_path)
-    
-    # Get the video's properties (frame width, height, and FPS)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    # pastikan folder output ada
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    # Define the codec and create a VideoWriter object for MP4 output
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Codec for MP4 format
-    out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
+    # Perintah FFmpeg
+    command = [
+        "ffmpeg",
+        "-y",                  # overwrite file kalau sudah ada
+        "-i", input_path,      # input file
+        "-c:v", "libx264",     # codec video H.264 (web compatible)
+        "-preset", "fast",     # kecepatan encoding (fast/balanced)
+        "-crf", "23",          # quality (0=lossless, 23=default)
+        "-pix_fmt", "yuv420p", # pixel format yang didukung HTML5 video
+        output_path
+    ]
 
-    # Read and write each frame to the new video file
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-        out.write(frame)
-    
-    # Release resources
-    cap.release()
-    out.release()
+    print("🎬 Converting using FFmpeg:", " ".join(command))
+
+    # Jalankan ffmpeg, tampilkan error kalau gagal
+    result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    if result.returncode != 0:
+        print("❌ FFmpeg conversion failed!")
+        print(result.stderr.decode())
+        raise RuntimeError("FFmpeg failed to convert video")
+
+    print("✅ Conversion complete:", output_path)
 
 def inference_objectDetection(user_id, project_id):
     project_dir = f"inference/{user_id}/{project_id}"
