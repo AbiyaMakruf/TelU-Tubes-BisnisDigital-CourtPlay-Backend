@@ -51,7 +51,21 @@ def get_project_info(project_id):
         print(f"Error getting project {project_id}: {e}")
         return None, None
 
-def update_project_details(project_details_id, video_objectDetection, video_playerKeyPoint, images_ball_dropping, forehand_count, backhand_count, serve_count, video_duration, video_processing_time,ready_position_count,video_courtKeyPoint,image_heatmap_player):
+def update_project_details(
+    project_details_id, 
+    video_objectDetection, 
+    video_playerKeyPoint, 
+    images_ball_dropping, 
+    forehand_count, 
+    backhand_count, 
+    serve_count,
+    ready_position_count, 
+    video_duration, 
+    video_processing_time,
+    video_courtKeyPoint,
+    image_heatmap_player
+):
+
     try:
         response = (
             supabase.table("project_details")

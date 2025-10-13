@@ -92,7 +92,6 @@ def infer_video(payload: InferenceRequest):
 
 
         # To Do
-        ready_position_count =0
         video_courtKeyPoint = "http://test"
         image_heatmap_player = "http://test"
 
@@ -102,12 +101,12 @@ def infer_video(payload: InferenceRequest):
             link_video_object_detection, 
             link_video_keypoints, 
             link_thumbnail,
-            int(stroke_count['forehand']), 
-            int(stroke_count['backhand']), 
-            int(stroke_count['serve']), 
+            int(stroke_count['Forehand']), 
+            int(stroke_count['Backhand']), 
+            int(stroke_count['Serve']),
+            int(stroke_count['Ready_Position']), 
             int(duration_seconds), 
             int(inference_time),
-            ready_position_count,
             video_courtKeyPoint,
             image_heatmap_player
         ):

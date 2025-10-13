@@ -86,9 +86,10 @@ def inference_playerKeyPoint(user_id, project_id):
     model = YOLO("models/playerKeyPoint/playerKeyPoint.pt")
 
     stroke_counts = {
-        'forehand': 0,
-        'backhand': 0,
-        'serve': 0
+        'Backhand': 0,
+        'Forehand': 0,
+        'Ready_Position': 0,
+        'Serve': 0
     }
 
     class_names = model.names
@@ -105,7 +106,6 @@ def inference_playerKeyPoint(user_id, project_id):
 
         for result in results:
             detected_class_ids = result.boxes.cls.tolist()
-            
             # Hitung setiap class ID
             for class_id in detected_class_ids:
                 class_name = class_names[int(class_id)]
