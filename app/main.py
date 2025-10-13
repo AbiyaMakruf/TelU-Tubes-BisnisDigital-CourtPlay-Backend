@@ -10,7 +10,7 @@ from .gcs_utils import download_model, download_original_video, upload_video, up
 from .yolo_utils import inference_objectDetection, inference_playerKeyPoint
 from .supabase_utils import get_link_original_video, update_project_details, get_user_info, get_project_info, update_projects
 from .mailtrap_utils import send_success_email
-from .common_utils import get_video_duration, extract_first_frame_as_thumbnail
+from .common_utils import get_video_duration, extract_first_frame_as_thumbnail, get_hardware_info
 
 app = FastAPI(title="YOLO Video Object Detection API")
 
@@ -132,39 +132,12 @@ def infer_video(payload: InferenceRequest):
         if os.path.exists(local_project_root_dir):
             shutil.rmtree(local_project_root_dir)
 
-
-def get_gpu_info():
-    """Mendeteksi ketersediaan dan tipe GPU."""
-    try:
-        if torch.cuda.is_available():
-            device_count = torch.cuda.device_count()
-            
-            # Mendapatkan nama GPU pertama
-            gpu_name = torch.cuda.get_device_name(0) 
-            
-            return {
-                "using_gpu": True,
-                "gpu_count": device_count,
-                "gpu_name": gpu_name
-            }
-        else:
-            return {
-                "using_gpu": False,
-                "detail": "CUDA device not found. Running on CPU."
-            }
-    except Exception as e:
-        # Menangani jika PyTorch tidak terinstal atau gagal inisialisasi CUDA
-        return {
-            "using_gpu": False,
-            "detail": f"GPU check failed (PyTorch not functional): {e}"
-        }
-
 @app.get("/")
 def health_check():
-    gpu_status = get_gpu_info()
+    hardware_info = get_hardware_info()
     
     return {
         "status": "ok", 
         "message": "Object Detection Service Running",
-        "hardware": gpu_status
+        "hardware": hardware_info
     }
