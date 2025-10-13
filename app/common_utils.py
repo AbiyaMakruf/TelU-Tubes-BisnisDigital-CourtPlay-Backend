@@ -3,6 +3,7 @@ import os
 from torch import cuda
 import psutil
 import cpuinfo
+import platform
 
 def get_hardware_info():
     hw_info = {
@@ -11,8 +12,10 @@ def get_hardware_info():
         'cpu_name': 'N/A',
         'cpu_threads': 0,
         'ram_mb': 0,
+        'os_info': 'N/A'
     }
     
+    # GPU Name & VRAM
     try:
         if cuda.is_available():
             hw_info['gpu_name'] = cuda.get_device_name(0)
@@ -20,7 +23,8 @@ def get_hardware_info():
     except Exception as e:
         hw_info['gpu_name'] = f"Cannot get GPU name"
         hw_info['vram_mb'] = 0
-        
+    
+    # CPU Name, Threads, RAM
     try:
         cpu = cpuinfo.get_cpu_info()
         hw_info['cpu_name'] = cpu['brand_raw']
@@ -31,6 +35,16 @@ def get_hardware_info():
         hw_info['cpu_threads'] = 0
         hw_info['ram_mb'] = 0
 
+    # OS Info
+    try:
+        os_info_str = platform.platform()
+        if os.path.exists('/.dockerenv'):
+             hw_info["os_info"] = f"Docker ({os_info_str})"
+        else:
+             hw_info["os_info"] = os_info_str
+    except Exception as e:
+        hw_info['os_info'] = "Cannot get OS info"
+    
     return hw_info
 
 def get_video_duration(video_path: str) -> int:
