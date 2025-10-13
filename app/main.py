@@ -8,7 +8,7 @@ from pydantic import BaseModel, UUID4
 # Impor utilitas
 from .gcs_utils import download_model, download_original_video, upload_video, upload_thumbnail
 from .yolo_utils import inference_objectDetection, inference_playerKeyPoint
-from .supabase_utils import get_link_original_video, update_project_details, get_user_info, get_project_info, update_projects
+from .supabase_utils import get_link_original_video, update_project_details, get_user_info, get_project_info, update_projects, insert_inference_log
 from .mailtrap_utils import send_success_email
 from .common_utils import get_video_duration, extract_first_frame_as_thumbnail, get_hardware_info
 
@@ -52,6 +52,7 @@ def infer_video(payload: InferenceRequest):
     user_id = str(payload.user_id)
     project_id = str(payload.project_id)
     project_details_id = str(payload.project_details_id)
+    hw_info = get_hardware_info()
     
     local_project_root_dir = f"inference/{user_id}/{project_id}"
     local_video_input_path = os.path.join(local_project_root_dir, "original_video.mp4")
@@ -73,10 +74,13 @@ def infer_video(payload: InferenceRequest):
         link_thumbnail = upload_thumbnail(bucket_name, user_id, project_id, path_thumbnail)
         
         # 4. Inferensi dan Penghitungan Waktu
-        time_start = time.time()
+        detection_time_start = time.time()
         path_video_object_detection = inference_objectDetection(user_id, project_id)
+        detection_time_end = time.time()
+        
+        keypoint_time_start = time.time()
         keypoint_result = inference_playerKeyPoint(user_id, project_id)
-        time_end = time.time()
+        keypoint_time_end = time.time()
         
         # Ekstrak hasil
         path_video_player_key_point = keypoint_result['path']
@@ -84,7 +88,9 @@ def infer_video(payload: InferenceRequest):
         
         # Penghitungan akhir
         duration_seconds = get_video_duration(local_video_input_path)
-        inference_time = time_end - time_start
+        detection_inference_time = detection_time_end - detection_time_start
+        keypoint_inference_time = keypoint_time_end - keypoint_time_start
+        total_inference_time = keypoint_time_end - detection_time_start
 
         # 5. Upload Video Hasil
         link_video_object_detection = upload_video(bucket_name, "objectDetection", user_id, project_id, path_video_object_detection)
@@ -106,7 +112,7 @@ def infer_video(payload: InferenceRequest):
             int(stroke_count['Serve']),
             int(stroke_count['Ready_Position']), 
             int(duration_seconds), 
-            int(inference_time),
+            int(total_inference_time),
             video_courtKeyPoint,
             image_heatmap_player
         ):
@@ -117,13 +123,45 @@ def infer_video(payload: InferenceRequest):
                 receiver_email=email,
                 video_duration=duration_seconds
             )
+            
             update_projects(project_id, link_thumbnail, True)
+            
+            insert_inference_log(
+                project_id,
+                user_id,
+                int(detection_inference_time),
+                int(keypoint_inference_time),
+                int(total_inference_time),
+                hw_info['gpu_name'],
+                hw_info['vram_mb'],
+                hw_info['cpu_name'],
+                hw_info['cpu_threads'],
+                hw_info['ram_mb'],
+                hw_info['os_info'],
+                "success"
+            )
 
         return {"status": "success", "message": "Inference and update complete."}
         
     except Exception as e:
         # Menangkap error dan memberikan respon HTTP yang benar
         print(f"FATAL ERROR during processing: {e}")
+        
+        insert_inference_log(
+                project_id,
+                user_id,
+                int(detection_inference_time),
+                int(keypoint_inference_time),
+                int(total_inference_time),
+                hw_info['gpu_name'],
+                hw_info['vram_mb'],
+                hw_info['cpu_name'],
+                hw_info['cpu_threads'],
+                hw_info['ram_mb'],
+                hw_info['os_info'],
+                "failed"
+            )
+        
         # Lakukan pembaruan status Supabase ke FAILED di sini (opsional tapi dianjurkan)
         raise HTTPException(status_code=500, detail=f"Inference processing failed: {e}")
 
