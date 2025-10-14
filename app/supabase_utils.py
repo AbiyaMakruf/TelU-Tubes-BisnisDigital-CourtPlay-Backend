@@ -101,6 +101,46 @@ def update_projects(project_id, thumbnail, status):
     except Exception as e:
         print(f"Error updating project {project_id}: {e}")
         return None
+    
+def insert_inference_log(
+    project_id,
+    user_id,
+    detection_inference_time,
+    keypoint_inference_time,
+    total_inference_time,
+    gpu_name,
+    vram_mb,
+    cpu_name,
+    cpu_threads,
+    ram_mb,
+    os_info,
+    inference_status
+):
+    try:
+        response = (
+            supabase.table("hwinfo")
+            .update({
+                "project_id": project_id,
+                "user_id": user_id,
+                "detection_inference_time": detection_inference_time,
+                "keypoint_inference_time": keypoint_inference_time,
+                "total_inference_time": total_inference_time,
+                "gpu_name": gpu_name,
+                "vram_mb": vram_mb,
+                "cpu_name": cpu_name,
+                "cpu_threads": cpu_threads,
+                "ram_mb": ram_mb,
+                "os_info": os_info,
+                "is_success": inference_status,
+                "updated_at": "now()"
+            })
+            .eq("project_id", project_id)
+            .execute()
+        )
+        return response.data
+    except Exception as e:
+        print(f"Error inserting inference log for project {project_id}: {e}")
+        return None
 
 # print(get_link_original_video("a017675f-9297-41b2-815c-618c3fcf8b73")['link_original_video'])
 # print(update("a017675f-9297-41b2-815c-618c3fcf8b73", "link_video_objectDetection", "link_video_playerKeyPoint", "images_ball_dropping", 1, 2, 3, 4, 5))

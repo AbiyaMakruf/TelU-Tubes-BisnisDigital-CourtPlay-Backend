@@ -8,3 +8,5 @@ numpy
 supabase
 python-dotenv
 mailtrap
+
+py-cpuinfo
