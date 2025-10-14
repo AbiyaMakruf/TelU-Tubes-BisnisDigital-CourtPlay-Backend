@@ -118,8 +118,8 @@ def insert_inference_log(
 ):
     try:
         response = (
-            supabase.table("inference_logs")
-            .insert({
+            supabase.table("hwinfo")
+            .update({
                 "project_id": project_id,
                 "user_id": user_id,
                 "detection_inference_time": detection_inference_time,
@@ -131,8 +131,10 @@ def insert_inference_log(
                 "cpu_threads": cpu_threads,
                 "ram_mb": ram_mb,
                 "os_info": os_info,
-                "status": inference_status
+                "is_success": inference_status,
+                "updated_at": "now()"
             })
+            .eq("project_id", project_id)
             .execute()
         )
         return response.data

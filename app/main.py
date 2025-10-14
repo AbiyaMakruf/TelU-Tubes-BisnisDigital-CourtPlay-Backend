@@ -138,7 +138,7 @@ def infer_video(payload: InferenceRequest):
                 hw_info['cpu_threads'],
                 hw_info['ram_mb'],
                 hw_info['os_info'],
-                "success"
+                True
             )
 
         return {"status": "success", "message": "Inference and update complete."}
@@ -159,7 +159,7 @@ def infer_video(payload: InferenceRequest):
                 hw_info['cpu_threads'],
                 hw_info['ram_mb'],
                 hw_info['os_info'],
-                "failed"
+                False
             )
         
         # Lakukan pembaruan status Supabase ke FAILED di sini (opsional tapi dianjurkan)
