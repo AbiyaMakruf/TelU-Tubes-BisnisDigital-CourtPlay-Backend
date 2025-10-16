@@ -3,4 +3,9 @@
 *.avi
 .env
 courtplay-analytics-474615-92b2bbfdc547.json
-app/__pycache__
+*.pyc
+__pycache__/
+*.$py.class
+*.png
+
+
