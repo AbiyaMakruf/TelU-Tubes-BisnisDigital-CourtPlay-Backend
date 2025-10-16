@@ -4,3 +4,6 @@
 .env
 courtplay-analytics-474615-92b2bbfdc547.json
 app/__pycache__
+__pycache__
+*.pyc
+*.png
