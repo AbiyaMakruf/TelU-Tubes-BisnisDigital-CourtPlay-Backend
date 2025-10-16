@@ -118,7 +118,7 @@ def download_if_model_not_exists(bucket_name,model_type):
     if os.path.exists(f"models/{model_type}/{model_type}.pt"):
         logger.info(f"Model {model_type} already exists")
     else:
-        download(bucket_name,f"models/{model_type}/{model_type}.pt",f"models/{model_type}/{model_type}.pt")
+        download(bucket_name,f"assets/models/{model_type}/{model_type}.pt",f"models/{model_type}/{model_type}.pt")
         logger.info(f"Model {model_type} downloaded")
 
 def get_original_video_name(link_video):

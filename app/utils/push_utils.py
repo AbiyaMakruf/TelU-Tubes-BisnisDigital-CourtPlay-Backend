@@ -1,7 +1,7 @@
 import json
 import os
 from google.cloud import pubsub_v1
-from utils.supabase_utils import *
+from supabase_utils import *
 from dotenv import load_dotenv
 
 # Project dan Topic ID Google Cloud
