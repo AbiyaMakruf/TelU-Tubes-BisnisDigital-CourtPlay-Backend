@@ -54,15 +54,15 @@ def process_inference_task(payload: dict):
         
         # 2. Download original video from GCS        
         download("courtplay-storage",
-                 f"uploads/videos/{payload_data["user_id"]}/{payload_data["project_id"]}/{get_original_video_name(link_original_video)}",
-                 f"inference/{payload_data["user_id"]}/{payload_data["project_id"]}/original_video.mp4"
+                 f"uploads/videos/{payload_data['user_id']}/{payload_data['project_id']}/{get_original_video_name(link_original_video)}",
+                 f"inference/{payload_data['user_id']}/{payload_data['project_id']}/original_video.mp4"
                  )
-        video_duration = get_video_duration(f"inference/{payload_data["user_id"]}/{payload_data["project_id"]}/original_video.mp4")
-        
+        video_duration = get_video_duration(f"inference/{payload_data['user_id']}/{payload_data['project_id']}/original_video.mp4")
+
         # 3. Extract thumbnail and upload to GCS
-        thumbnail_path = extract_first_frame_as_thumbnail(f"inference/{payload_data["user_id"]}/{payload_data["project_id"]}/original_video.mp4", f"inference/{payload_data["user_id"]}/{payload_data["project_id"]}")
-        thumbnail_public_link = upload("courtplay-storage", thumbnail_path, f"uploads/videos/{payload_data["user_id"]}/{payload_data["project_details_id"]}/thumbnail.jpg")
-        
+        thumbnail_path = extract_first_frame_as_thumbnail(f"inference/{payload_data['user_id']}/{payload_data['project_id']}/original_video.mp4", f"inference/{payload_data['user_id']}/{payload_data['project_id']}")
+        thumbnail_public_link = upload("courtplay-storage", thumbnail_path, f"uploads/videos/{payload_data['user_id']}/{payload_data['project_details_id']}/thumbnail.jpg")
+
         # 4. Inference ObjectDetection
         detection_time_start = time.time()
         video_object_detection_path = inference_objectDetection(payload_data["user_id"], payload_data["project_id"])
@@ -81,8 +81,8 @@ def process_inference_task(payload: dict):
         stroke_count = keypoint_result['stroke_counts']
         
         # 7. Upload video to GCS
-        video_object_detection_public_link = upload("courtplay-storage",video_object_detection_path,f"uploads/videos/{payload_data["user_id"]}/{payload_data["project_details_id"]}/objectDetection.mp4")
-        video_player_keypoint_public_link = upload("courtplay-storage",video_player_keypoint_path,f"uploads/videos/{payload_data["user_id"]}/{payload_data["project_details_id"]}/playerKeyPoint.mp4")
+        video_object_detection_public_link = upload("courtplay-storage",video_object_detection_path,f"uploads/videos/{payload_data['user_id']}/{payload_data['project_details_id']}/objectDetection.mp4")
+        video_player_keypoint_public_link = upload("courtplay-storage",video_player_keypoint_path,f"uploads/videos/{payload_data['user_id']}/{payload_data['project_details_id']}/playerKeyPoint.mp4")
 
         # Placeholder untuk To Do
         video_court_keypoint_public_link = "IN DEVELOPMENT"
@@ -133,7 +133,7 @@ def process_inference_task(payload: dict):
             "project_name": project_data[0]["project_name"],
             "video_duration": video_duration,
             "upload_date": project_data[0]["upload_date"],
-            "report_url": f"courtplay.my.id/analytics/{payload_data["project_id"]}"
+            "report_url": f"courtplay.my.id/analytics/{payload_data['project_id']}"
         }
 
         if send_success_analysis_video(user_data[0]["email"], context_email):
@@ -144,12 +144,12 @@ def process_inference_task(payload: dict):
         update("hwinfo",data_update_hwinfo,{"project_id":payload_data["project_id"]})
             
     except Exception as e:
-        logger.error(f"Error during processing Project ID {payload_data["project_id"]}: {e}")
+        logger.error(f"Error during processing Project ID {payload_data['project_id']}: {e}")
         raise e
 
     finally:
-        if os.path.exists(f"inference/{payload_data["user_id"]}/{payload_data["project_id"]}"):
-            shutil.rmtree(f"inference/{payload_data["user_id"]}/{payload_data["project_id"]}")
+        if os.path.exists(f"inference/{payload_data['user_id']}/{payload_data['project_id']}"):
+            shutil.rmtree(f"inference/{payload_data['user_id']}/{payload_data['project_id']}")
         
 
 def pubsub_callback(message):
