@@ -61,3 +61,9 @@ jobs:
             --gpu=1 --gpu-type=nvidia-l4 \
             --set-env-vars="$ENV_VARS"
 
+      # 🚦 Langkah 2: Update Lalu Lintas ke Revisi Terbaru
+      - name: Route Traffic to Latest Revision
+        run: |
+          gcloud run services update-traffic courtplay-api-gpu \
+            --to-latest \
+            --region=us-central1

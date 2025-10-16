@@ -13,4 +13,8 @@ docker run -it ^
   -e SUPABASE_URL="https://qqcxjwxphvqfiffwftpt.supabase.co" ^
   -e SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFxY3hqd3hwaHZxZmlmZndmdHB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyMDg0NDAsImV4cCI6MjA3NTc4NDQ0MH0.ileKiwiqCwpBT0FGRxoyd9pAKrrluiH1xGjpsRxas5w" ^
   -e MAILTRAP_TOKEN="ce9a293bbce7cd6e2140ec38f3c6a323" ^
+  -e GCP_PROJECT_ID="courtplay-analytics-474615" ^
+  -e TOPIC_ID="courtplay-pubSub" ^
+  -e SUBSCRIPTION_ID="inference" ^
+  -e MAX_CONCURRENT_MESSAGES=2 ^
   us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/test-image:latest
