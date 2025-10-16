@@ -4,10 +4,19 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+def get_all_projects():
+    try:
+        response = supabase.table("projects").select("id", "user_id", "project_details_id").eq("is_mailed", False).execute()
+        return response.data
+    except Exception as e:
+        print(f"Error getting all projects: {e}")
+        return None
 
 def get_link_original_video(project_details_id):
     try:
