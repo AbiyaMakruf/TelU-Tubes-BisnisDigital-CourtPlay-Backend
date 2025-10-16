@@ -51,6 +51,7 @@ jobs:
       # 🚀 Auto Deploy ke Cloud Run (GPU L4)
       - name: Deploy to Cloud Run (GPU)
         run: |
+          ENV_VARS=$(grep -v '^#' .env.production | grep '=' | sed '/^$/d' | tr '\n' ',' | sed 's/,$//')
           gcloud run deploy courtplay-api-gpu \
             --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest \
             --region=us-central1 \
