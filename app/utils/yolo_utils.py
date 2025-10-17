@@ -16,7 +16,8 @@ def inference_objectDetection(user_id, project_id):
     video_avi_format_path = os.path.join(project_path, temporary_path, "original_video.avi")
     video_mp4_format_path = os.path.join(project_path, "objectDetection_video.mp4")
 
-    model = YOLO("models/objectDetection/objectDetection.pt")
+    # model = YOLO("models/objectDetection/objectDetection.pt")
+    model = None
 
     try:
         results = model(
@@ -51,7 +52,8 @@ def inference_playerKeyPoint(user_id, project_id):
     video_avi_format_path = os.path.join(project_path, temporary_path, "original_video.avi")
     video_mp4_format_path = os.path.join(project_path, "playerKeyPoint_video.mp4")
 
-    model = YOLO("models/playerKeyPoint/playerKeyPoint.pt")
+    # model = YOLO("models/playerKeyPoint/playerKeyPoint.pt")
+    model = None
 
     stroke_counts = {
         'Backhand': 0,

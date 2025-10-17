@@ -41,7 +41,11 @@ def process_inference_task(payload: dict):
     Fungsi inti yang menangani seluruh alur kerja inferensi video, 
     dipanggil oleh setiap thread yang dibuat.
     """
+
+    # Hapus Logger Ini Jika Berjalan Di Cloud Run Sudah Normal~!
+    logger.info("Getting hardware info...")
     hw_info = get_hardware_inference_info()
+    logger.info("Getting hardware info success")
 
     try:
         payload_data = get_payload_data(payload)
@@ -160,7 +164,7 @@ def pubsub_callback(message):
     
     try:
         payload_data = json.loads(message.data.decode("utf-8"))
-        # process_inference_task(payload_data)
+        process_inference_task(payload_data)
         message.ack()
         logger.info(f"Message ID {message_id} processed and ACKed.")
 
