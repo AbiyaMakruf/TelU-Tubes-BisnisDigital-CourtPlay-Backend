@@ -160,7 +160,7 @@ def pubsub_callback(message):
     
     try:
         payload_data = json.loads(message.data.decode("utf-8"))
-        process_inference_task(payload_data)
+        # process_inference_task(payload_data)
         message.ack()
         logger.info(f"Message ID {message_id} processed and ACKed.")
 
