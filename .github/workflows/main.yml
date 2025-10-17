@@ -13,13 +13,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ✅ Simpan JSON key secara literal
+      # --- Setup Google Cloud ---
       - name: Create GCP credentials file
         run: |
           echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
           echo "GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json" >> $GITHUB_ENV
 
-      # ✅ Setup GCloud
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
@@ -27,33 +26,50 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
-      # ✅ Configure Docker untuk Artifact Registry
+      # --- Konfigurasi Docker Buildx untuk Caching ---
+
+      # 1. Setup QEMU (disarankan untuk Buildx)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        
+      # 2. Setup Buildx (Wajib untuk Caching)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3. Konfigurasi Docker untuk Artifact Registry (sebelum login)
       - name: Configure Docker for Artifact Registry
         run: |
           gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
           gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+          
+      # Variabel untuk tag image
+      - name: Set image tag
+        id: image
+        run: echo "TAG=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest" >> $GITHUB_OUTPUT
 
-      # ✅ Build Docker image
-      - name: Build Docker image
-        run: |
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest .
+      # --- 4. Build dan Push dengan Caching (Menggantikan 2 langkah lama) ---
+      - name: Build and push Docker image with GHA Cache
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.image.outputs.TAG }}
+          # Konfigurasi Caching Utama
+          # type=gha (GitHub Actions) adalah cache tercepat untuk layer Docker
+          cache-from: type=gha
+          cache-to: type=gha,mode=max # mode=max menyimpan semua layer, bahkan yang tidak terpakai
 
-      # ✅ Push Docker image
-      - name: Push Docker image
-        run: |
-          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest
-
-      # 🔐 Create .env.production file from GitHub Secret
+      # --- Deploy ke Cloud Run ---
+      
       - name: Create .env.production file
         run: |
           echo "${{ secrets.ENV_PRODUCTION_FILE }}" > .env.production
 
-      # 🚀 Auto Deploy ke Cloud Run (GPU L4)
       - name: Deploy to Cloud Run (GPU)
         run: |
           ENV_VARS=$(grep -v '^#' .env.production | grep '=' | sed '/^$/d' | tr '\n' ',' | sed 's/,$//')
           gcloud run deploy courtplay-api-gpu \
-            --image=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/courtplay-repo/courtplay-api:latest \
+            --image=${{ steps.image.outputs.TAG }} \
             --region=us-central1 \
             --platform=managed \
             --allow-unauthenticated \
@@ -63,7 +79,6 @@ jobs:
             --cpu-boost \
             --set-env-vars="$ENV_VARS"
 
-      # 🚦 Langkah 2: Update Lalu Lintas ke Revisi Terbaru
       - name: Route Traffic to Latest Revision
         run: |
           gcloud run services update-traffic courtplay-api-gpu \
