@@ -1,7 +1,7 @@
 import os
 import shutil
 import logging
-from ultralytics import YOLO
+import threading
 
 from .common_utils import convert_avi_to_mp4
 
@@ -9,8 +9,13 @@ from .common_utils import convert_avi_to_mp4
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Konfigurasi threading lock
+CONVERSION_LOCK = threading.Lock()
+OBJECT_DETECTION_LOCK = threading.Lock()
+PLAYER_KEYPOINT_LOCK = threading.Lock()
+
 def inference_objectDetection(user_id, project_id, model):
-    project_path = f"inference/{user_id}/{project_id}"
+    project_path = os.path.join("inference",f"{user_id}", f"{project_id}")
     temporary_path = "temporary_objectDetection"
     video_original_path = f"{project_path}/original_video.mp4"
     video_avi_format_path = os.path.join(project_path, temporary_path, "original_video.avi")
@@ -19,25 +24,33 @@ def inference_objectDetection(user_id, project_id, model):
     # model = YOLO("models/objectDetection/objectDetection.pt")
 
     try:
-        results = model(
-            source=video_original_path,
-            stream=True,
-            save=True,
-            project=project_path,
-            name=temporary_path,
-            exist_ok=True
-        )
+        logger.info("Starting inference object detection")
+        
+        with OBJECT_DETECTION_LOCK:
+            results = model(
+                source=video_original_path,
+                stream=True,
+                save=True,
+                project=project_path,
+                name=temporary_path,
+                exist_ok=True,
+                verbose=False
+            )
 
-        for result in results:
-            result.save(filename="image.png")
+            for result in results:
+                result.save(filename=f"OD-{project_id}.png")
 
-        convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+        with CONVERSION_LOCK:
+            logger.info(f"[{project_id}] Acquired lock for video conversion.")
+            convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+            logger.info(f"[{project_id}] Released lock after video conversion.")
+        os.remove(f"OD-{project_id}.png")
 
         logger.info("Success inference object detection")
         return video_mp4_format_path
     
     except Exception as e:
-        logger.error("Error inference object detection")
+        logger.error(f"Error inference object detection. {e}")
 
     finally:
         delete_path = os.path.join(project_path,temporary_path)
@@ -45,7 +58,7 @@ def inference_objectDetection(user_id, project_id, model):
             shutil.rmtree(delete_path)
 
 def inference_playerKeyPoint(user_id, project_id, model):
-    project_path = f"inference/{user_id}/{project_id}"
+    project_path = os.path.join("inference",f"{user_id}", f"{project_id}")
     temporary_path = "temporary_playerKeyPoint"
     video_original_path = f"{project_path}/original_video.mp4"
     video_avi_format_path = os.path.join(project_path, temporary_path, "original_video.avi")
@@ -61,29 +74,37 @@ def inference_playerKeyPoint(user_id, project_id, model):
     }
 
     try:
-        results = model(
-            source=video_original_path,
-            stream=True,
-            save=True,
-            project=project_path,
-            name=temporary_path,
-            exist_ok=True
-        )
+        logger.info("Starting inference player keypoint")
 
-        for result in results:
-            detected_class_ids = result.boxes.cls.tolist()
+        with PLAYER_KEYPOINT_LOCK:
+            results = model(
+                source=video_original_path,
+                stream=True,
+                save=True,
+                project=project_path,
+                name=temporary_path,
+                exist_ok=True,
+                verbose=False
+            )
 
-            class_names = model.names
+            for result in results:
+                detected_class_ids = result.boxes.cls.tolist()
 
-            for class_id in detected_class_ids:
-                class_name = class_names[int(class_id)]
-                
-                if class_name in stroke_counts:
-                    stroke_counts[class_name] += 1
+                class_names = model.names
 
-            result.save(filename="image.png")
+                for class_id in detected_class_ids:
+                    class_name = class_names[int(class_id)]
+                    
+                    if class_name in stroke_counts:
+                        stroke_counts[class_name] += 1
 
-        convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+                result.save(filename=f"PKP-{project_id}.png")
+
+        with CONVERSION_LOCK:
+            logger.info(f"[{project_id}] Acquired lock for video conversion.")
+            convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+            logger.info(f"[{project_id}] Released lock after video conversion.")
+        os.remove(f"PKP-{project_id}.png")
 
         logger.info("Success inference player keypoint")
 
@@ -93,12 +114,14 @@ def inference_playerKeyPoint(user_id, project_id, model):
         }
     
     except Exception as e:
-        logger.error("Error inference object detection")
+        logger.error(f"Error inference player keypoint. {e}")
 
     finally:
         delete_path = os.path.join(project_path,temporary_path)
         if os.path.exists(delete_path):
             shutil.rmtree(delete_path)
+            
+        
 
 
 # # To Do

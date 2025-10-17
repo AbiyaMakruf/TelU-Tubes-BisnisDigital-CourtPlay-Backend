@@ -16,5 +16,5 @@ docker run -it ^
   -e GCP_PROJECT_ID="courtplay-analytics-474615" ^
   -e TOPIC_ID="courtplay-pubSub" ^
   -e SUBSCRIPTION_ID="inference" ^
-  -e MAX_CONCURRENT_MESSAGES=2 ^
+  -e MAX_CONCURRENT_MESSAGES=1 ^
   us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/backend-app:latest
