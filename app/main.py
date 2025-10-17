@@ -68,6 +68,7 @@ def startup_event():
 def health_check():
     hardware_info = get_hardware_inference_info()
     
+    # Menambahkan line code untuk menguji coba seberapa cepat hasil caching github action
     return {
         "status": "ok", 
         "message": f"YOLO Inference Worker Running (PARALLEL Mode, Max Threads: {MAX_MESSAGES_PER_PULL})",
