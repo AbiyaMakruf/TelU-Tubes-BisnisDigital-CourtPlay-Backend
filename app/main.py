@@ -37,7 +37,8 @@ def startup_event():
     except Exception as e:
         logger.error(f"Failed to download model. {e}")
 
-    listener_thread = threading.Thread(target=pull_messages(PROJECT_ID, SUBSCRIPTION_ID, MAX_MESSAGES_PER_PULL), daemon=True)
+    listener_thread = threading.Thread(target=pull_messages, args=(PROJECT_ID, SUBSCRIPTION_ID, MAX_MESSAGES_PER_PULL), daemon=True)
+    logger.info(f"Starting Pub/Sub Listener Thread. Max Concurrent Messages: {MAX_MESSAGES_PER_PULL}")
     listener_thread.start()
 
 @app.get("/")

@@ -3,7 +3,7 @@
 ![Tech Stack](README/tech_stack.png)
 
 # Build Docker Local
-docker build -t us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/test-image:latest .
+docker build -t us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/backend-app:latest .
 
 # Run Docker Local
 docker run -it ^
@@ -17,4 +17,4 @@ docker run -it ^
   -e TOPIC_ID="courtplay-pubSub" ^
   -e SUBSCRIPTION_ID="inference" ^
   -e MAX_CONCURRENT_MESSAGES=2 ^
-  us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/test-image:latest
+  us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/backend-app:latest
