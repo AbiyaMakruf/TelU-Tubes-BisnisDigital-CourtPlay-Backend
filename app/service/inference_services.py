@@ -16,6 +16,18 @@ from ..utils.mailtrap_utils import send_success_analysis_video
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Konfigurasi Global
+GLOBAL_MODELS = {
+    "objectDetection": None,
+    "playerKeyPoint": None,
+    "courtKeyPoint": None,
+}
+
+def set_global_models(models):
+    global GLOBAL_MODELS
+    GLOBAL_MODELS = models
+    logger.info("Global models set for inference service.")
+
 def get_payload_data(payload_data):
     class InferencePayload(BaseModel):
         id: UUID4
@@ -69,13 +81,13 @@ def process_inference_task(payload: dict):
 
         # 4. Inference ObjectDetection
         detection_time_start = time.time()
-        video_object_detection_path = inference_objectDetection(payload_data["user_id"], payload_data["project_id"])
+        video_object_detection_path = inference_objectDetection(payload_data["user_id"], payload_data["project_id"], GLOBAL_MODELS["objectDetection"])
         detection_time_end = time.time()
         detection_inference_time = detection_time_end - detection_time_start
         
         # 5. Inference PlayerKeyPoint 
         keypoint_time_start = time.time()
-        keypoint_result = inference_playerKeyPoint(payload_data["user_id"], payload_data["project_id"])
+        keypoint_result = inference_playerKeyPoint(payload_data["user_id"], payload_data["project_id"], GLOBAL_MODELS["playerKeyPoint"])
         keypoint_time_end = time.time()
         keypoint_inference_time = keypoint_time_end - keypoint_time_start
         

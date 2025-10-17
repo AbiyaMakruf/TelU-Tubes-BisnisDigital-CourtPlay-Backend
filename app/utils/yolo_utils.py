@@ -9,7 +9,7 @@ from .common_utils import convert_avi_to_mp4
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def inference_objectDetection(user_id, project_id):
+def inference_objectDetection(user_id, project_id, model):
     project_path = f"inference/{user_id}/{project_id}"
     temporary_path = "temporary_objectDetection"
     video_original_path = f"{project_path}/original_video.mp4"
@@ -17,7 +17,6 @@ def inference_objectDetection(user_id, project_id):
     video_mp4_format_path = os.path.join(project_path, "objectDetection_video.mp4")
 
     # model = YOLO("models/objectDetection/objectDetection.pt")
-    model = None
 
     try:
         results = model(
@@ -45,7 +44,7 @@ def inference_objectDetection(user_id, project_id):
         if os.path.exists(delete_path):
             shutil.rmtree(delete_path)
 
-def inference_playerKeyPoint(user_id, project_id):
+def inference_playerKeyPoint(user_id, project_id, model):
     project_path = f"inference/{user_id}/{project_id}"
     temporary_path = "temporary_playerKeyPoint"
     video_original_path = f"{project_path}/original_video.mp4"
@@ -53,8 +52,7 @@ def inference_playerKeyPoint(user_id, project_id):
     video_mp4_format_path = os.path.join(project_path, "playerKeyPoint_video.mp4")
 
     # model = YOLO("models/playerKeyPoint/playerKeyPoint.pt")
-    model = None
-
+    
     stroke_counts = {
         'Backhand': 0,
         'Forehand': 0,
