@@ -33,8 +33,8 @@ def inference_objectDetection(user_id, project_id, model):
                 save=True,
                 project=project_path,
                 name=temporary_path,
-                exist_ok=True,
-                verbose=False
+                # verbose=False,
+                exist_ok=True
             )
 
             for result in results:
@@ -83,8 +83,8 @@ def inference_playerKeyPoint(user_id, project_id, model):
                 save=True,
                 project=project_path,
                 name=temporary_path,
-                exist_ok=True,
-                verbose=False
+                # verbose=False,
+                exist_ok=True
             )
 
             for result in results:
