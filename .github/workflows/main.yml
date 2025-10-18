@@ -2,7 +2,7 @@ name: Build, Push, and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, development-pubsub-push ]
   workflow_dispatch:
 
 jobs:
@@ -75,8 +75,8 @@ jobs:
             --allow-unauthenticated \
             --service-account=github-runner-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
             --port=8080 \
-            --cpu=8 \
-            --memory=32Gi \
+            --cpu=4 \
+            --memory=16Gi \
             --gpu=1 --gpu-type=nvidia-l4 \
             --cpu-boost \
             --async \

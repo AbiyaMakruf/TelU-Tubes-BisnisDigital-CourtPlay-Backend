@@ -3,7 +3,6 @@ import logging
 import time
 import shutil
 from pydantic import BaseModel, UUID4
-from google.cloud import pubsub_v1
 
 # Import from /utils
 from ..utils.common_utils import get_hardware_inference_info, get_original_video_name, extract_first_frame_as_thumbnail, get_video_duration
@@ -53,9 +52,7 @@ def process_inference_task(payload: dict):
     Fungsi inti yang menangani seluruh alur kerja inferensi video, 
     dipanggil oleh setiap thread yang dibuat.
     """
-
-    # Hapus Logger Ini Jika Berjalan Di Cloud Run Sudah Normal~!
-    logger.info("Getting hardware info...")
+    
     hw_info = get_hardware_inference_info()
     logger.info("Getting hardware info success")
 
@@ -166,48 +163,3 @@ def process_inference_task(payload: dict):
     finally:
         if os.path.exists(f"inference/{payload_data['user_id']}/{payload_data['project_id']}"):
             shutil.rmtree(f"inference/{payload_data['user_id']}/{payload_data['project_id']}")
-        
-
-def pubsub_callback(message):
-    """
-    Dipanggil oleh Pub/Sub SDK saat pesan diterima. Berjalan di thread pool.
-    """
-    message_id = message.message_id
-    
-    try:
-        payload_data = json.loads(message.data.decode("utf-8"))
-        process_inference_task(payload_data)
-        message.ack()
-        logger.info(f"Message ID {message_id} processed and ACKed.")
-
-    except Exception as e:
-        logger.error(f"Error processing message ID {message_id}: {e}")
-        message.nack()
-        logger.info(f"Message ID {message_id} NACKed for redelivery.")
-
-def pull_messages(PROJECT_ID, SUBSCRIPTION_ID, MAX_MESSAGES_PER_PULL):
-    """
-    Memulai proses mendengarkan pesan dari Pub/Sub menggunakan metode Streaming Pull 
-    """
-    subscriber = pubsub_v1.SubscriberClient()
-    subscription_path = subscriber.subscription_path(PROJECT_ID, SUBSCRIPTION_ID)
-
-    # Menggunakan flow control untuk membatasi jumlah pesan (thread) yang diproses secara paralel
-    flow_control = pubsub_v1.types.FlowControl(max_messages=MAX_MESSAGES_PER_PULL)
-
-    streaming_pull_future = subscriber.subscribe(
-        subscription_path, 
-        callback=pubsub_callback,
-        flow_control=flow_control
-    )
-    
-    try:
-        streaming_pull_future.result() 
-    except TimeoutError:
-        streaming_pull_future.cancel()
-        logger.warning("Streaming Pull Timeout (Unexpected).")
-    except Exception as e:
-        logger.error(f"Error in Pub/Sub Streaming Worker: {e}")
-        streaming_pull_future.cancel()
-        
-    subscriber.close()
