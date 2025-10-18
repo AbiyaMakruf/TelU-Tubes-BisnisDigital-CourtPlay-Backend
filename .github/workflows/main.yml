@@ -72,7 +72,6 @@ jobs:
             --image=${{ steps.image.outputs.TAG }} \
             --region=us-central1 \
             --platform=managed \
-            --allow-unauthenticated \
             --service-account=github-runner-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
             --port=8080 \
             --cpu=8 \
@@ -80,6 +79,7 @@ jobs:
             --gpu=1 --gpu-type=nvidia-l4 \
             --cpu-boost \
             --async \
+            --allow-unauthenticated \
             --set-env-vars="$ENV_VARS"
 
       - name: Route Traffic to Latest Revision
