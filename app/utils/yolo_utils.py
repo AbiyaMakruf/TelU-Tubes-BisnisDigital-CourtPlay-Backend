@@ -7,6 +7,8 @@ from .common_utils import convert_avi_to_mp4
 
 # Konfigurasi lock
 CONVERSION_LOCK = threading.Lock()
+OD_LOCK = threading.Lock()
+PKP_LOCK = threading.Lock()
 
 # Konfigurasi Log
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -24,24 +26,28 @@ def inference_objectDetection(user_id, project_id, model):
     try:
         logger.info(f"Starting inference object detection. {project_id}")
         
-        results = model(
-            source=video_original_path,
-            stream=True,
-            save=True,
-            project=project_path,
-            name=temporary_path,
-            verbose=False,
-            exist_ok=True
-        )
+        with OD_LOCK:
+            logger.info(f"🔒Acquired lock for object detection inference. {project_id}")
+            results = model(
+                source=video_original_path,
+                stream=True,
+                save=True,
+                project=project_path,
+                name=temporary_path,
+                verbose=False,
+                exist_ok=True
+            )
 
-        for result in results:
-            result.save(filename=f"OD-{project_id}.png")
+            for result in results:
+                result.save(filename=f"OD-{project_id}.png")
+
+            logger.info(f"🔓Released lock for object detection inference. {project_id}")
 
         logger.info(f"Converting avi to mp4 format. {project_id}")
         with CONVERSION_LOCK:
-            logger.info(f"🔒Acquired lock for video conversion. {project_id}")
+            logger.info(f"🔒Acquired lock for video conversion OD. {project_id}")
             convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
-            logger.info(f"🔓Released lock for video conversion. {project_id}")
+            logger.info(f"🔓Released lock for video conversion OD. {project_id}")
         os.remove(f"OD-{project_id}.png")
 
         logger.info(f"Success inference object detection. {project_id}")
@@ -74,34 +80,37 @@ def inference_playerKeyPoint(user_id, project_id, model):
     try:
         logger.info(f"Starting inference player keypoint. {project_id}")
 
-        results = model(
-            source=video_original_path,
-            stream=True,
-            save=True,
-            project=project_path,
-            name=temporary_path,
-            verbose=False,
-            exist_ok=True
-        )
+        with PKP_LOCK:
+            logger.info(f"🔒Acquired lock for player keypoint inference. {project_id}")
+            results = model(
+                source=video_original_path,
+                stream=True,
+                save=True,
+                project=project_path,
+                name=temporary_path,
+                verbose=False,
+                exist_ok=True
+            )
 
-        for result in results:
-            detected_class_ids = result.boxes.cls.tolist()
+            for result in results:
+                detected_class_ids = result.boxes.cls.tolist()
 
-            class_names = model.names
+                class_names = model.names
 
-            for class_id in detected_class_ids:
-                class_name = class_names[int(class_id)]
-                
-                if class_name in stroke_counts:
-                    stroke_counts[class_name] += 1
+                for class_id in detected_class_ids:
+                    class_name = class_names[int(class_id)]
+                    
+                    if class_name in stroke_counts:
+                        stroke_counts[class_name] += 1
 
-            result.save(filename=f"PKP-{project_id}.png")
+                result.save(filename=f"PKP-{project_id}.png")
+            logger.info(f"🔓Released lock for player keypoint inference. {project_id}")
 
         logger.info(f"Converting avi to mp4 format. {project_id}")
         with CONVERSION_LOCK:
-            logger.info(f"🔒Acquired lock for video conversion. {project_id}")
+            logger.info(f"🔒Acquired lock for video conversion PKP. {project_id}")
             convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
-            logger.info(f"🔓Released lock for video conversion. {project_id}")
+            logger.info(f"🔓Released lock for video conversion PKP. {project_id}")
         os.remove(f"PKP-{project_id}.png")
 
         logger.info(f"Success inference player keypoint. {project_id}")
