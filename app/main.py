@@ -3,7 +3,7 @@ import logging
 import base64
 import json
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from ultralytics import YOLO
 from pydantic import BaseModel
 
@@ -79,7 +79,7 @@ def health_check():
     }
 
 @app.post("/inference")
-async def receive_pubsub_push(request):
+async def receive_pubsub_push(request: Request):
     try:
         data = await request.json()
         pubsub_message = PubSubMessage(**data)
