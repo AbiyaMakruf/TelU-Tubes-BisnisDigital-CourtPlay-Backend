@@ -2,6 +2,7 @@ import os
 import logging
 import base64
 import json
+import threading
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from ultralytics import YOLO
@@ -86,7 +87,12 @@ async def receive_pubsub_push(request: Request):
         encoded_data = pubsub_message.message.get("data")
         decoded_data = base64.b64decode(encoded_data).decode("utf-8")
         payload = json.loads(decoded_data)
-        process_inference_task(payload)
+        thread = threading.Thread(
+            target=process_inference_task, 
+            args=(payload,), 
+            daemon=True)
+        thread.start()
+        logger.info("✅Inference task started in a separate thread.")
         return {"status": "ok", "message": "Inference task processed."}
     except Exception as e:
         logger.error(f"Error processing inference task: {e}", exc_info=True)
