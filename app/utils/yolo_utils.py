@@ -5,6 +5,9 @@ import threading
 
 from .common_utils import convert_avi_to_mp4
 
+# Konfigurasi lock
+CONVERSION_LOCK = threading.Lock()
+
 # Konfigurasi Log
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -35,7 +38,10 @@ def inference_objectDetection(user_id, project_id, model):
             result.save(filename=f"OD-{project_id}.png")
 
         logger.info(f"Converting avi to mp4 format. {project_id}")
-        convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+        with CONVERSION_LOCK:
+            logger.info(f"🔒Acquired lock for video conversion. {project_id}")
+            convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+            logger.info(f"🔓Released lock for video conversion. {project_id}")
         os.remove(f"OD-{project_id}.png")
 
         logger.info(f"Success inference object detection. {project_id}")
@@ -92,7 +98,10 @@ def inference_playerKeyPoint(user_id, project_id, model):
             result.save(filename=f"PKP-{project_id}.png")
 
         logger.info(f"Converting avi to mp4 format. {project_id}")
-        convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+        with CONVERSION_LOCK:
+            logger.info(f"🔒Acquired lock for video conversion. {project_id}")
+            convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
+            logger.info(f"🔓Released lock for video conversion. {project_id}")
         os.remove(f"PKP-{project_id}.png")
 
         logger.info(f"Success inference player keypoint. {project_id}")
