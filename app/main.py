@@ -97,3 +97,7 @@ async def receive_pubsub_push(request: Request):
     except Exception as e:
         logger.error(f"Error processing inference task: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
+    
+
+# # To Do
+# - Ubah main.yml agar tidak menggunakan service account

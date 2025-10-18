@@ -81,6 +81,10 @@ jobs:
             --async \
             --allow-unauthenticated \
             --timeout=3600 \
+            --max=3 \
+            --max-instances=3 \
+            --min=1 \
+            --min-instances=1 \
             --set-env-vars="$ENV_VARS"
 
       - name: Route Traffic to Latest Revision
