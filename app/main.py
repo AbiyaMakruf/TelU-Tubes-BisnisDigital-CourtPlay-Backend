@@ -78,7 +78,7 @@ def health_check():
         "hardware": hardware_info
     }
 
-@app.get("/inference")
+@app.post("/inference")
 async def receive_pubsub_push(request):
     try:
         data = await request.json()
