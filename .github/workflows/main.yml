@@ -75,7 +75,7 @@ jobs:
             --allow-unauthenticated \
             --service-account=github-runner-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
             --port=8080 \
-            --cpu=4 \
+            --cpu=8 \
             --memory=16Gi \
             --gpu=1 --gpu-type=nvidia-l4 \
             --cpu-boost \
