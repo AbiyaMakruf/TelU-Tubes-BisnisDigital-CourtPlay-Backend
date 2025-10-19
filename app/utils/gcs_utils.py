@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import google.cloud.logging
 from google.cloud import storage
 from google.cloud import pubsub_v1
 
@@ -8,8 +9,10 @@ from google.cloud import pubsub_v1
 storage_client = storage.Client()
 
 # Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+client = google.cloud.logging.Client()
+client.setup_logging()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def download(bucket_name, gcs_source_path, local_destination_path):
     """

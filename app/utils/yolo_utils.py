@@ -2,6 +2,7 @@ import os
 import shutil
 import logging
 import threading
+import google.cloud.logging
 
 from .common_utils import convert_avi_to_mp4
 
@@ -11,8 +12,10 @@ OD_LOCK = threading.Lock()
 PKP_LOCK = threading.Lock()
 
 # Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+client = google.cloud.logging.Client()
+client.setup_logging()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def inference_objectDetection(user_id, project_id, model):
     project_path = os.path.join("inference",f"{user_id}", f"{project_id}")

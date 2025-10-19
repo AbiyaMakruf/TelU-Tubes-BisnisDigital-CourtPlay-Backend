@@ -10,3 +10,4 @@ mailtrap
 py-cpuinfo
 google-cloud-pubsub
 jinja2
+google-cloud-logging

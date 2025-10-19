@@ -3,6 +3,7 @@ import logging
 import base64
 import json
 import threading
+import google.cloud.logging
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from ultralytics import YOLO
@@ -20,8 +21,10 @@ PROJECT_ID = os.getenv("GCP_PROJECT_ID")
 SUBSCRIPTION_ID = os.getenv("SUBSCRIPTION_ID")
 
 # Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+client = google.cloud.logging.Client()
+client.setup_logging()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Konfigurasi Global
 bucket_name = "courtplay-storage"

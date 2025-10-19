@@ -2,6 +2,7 @@ import json
 import logging
 import time
 import shutil
+import google.cloud.logging
 from pydantic import BaseModel, UUID4
 
 # Import from /utils
@@ -12,8 +13,10 @@ from ..utils.yolo_utils import inference_objectDetection, inference_playerKeyPoi
 from ..utils.mailtrap_utils import send_success_analysis_video
 
 # Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+client = google.cloud.logging.Client()
+client.setup_logging()
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Konfigurasi Global
 GLOBAL_MODELS = {
