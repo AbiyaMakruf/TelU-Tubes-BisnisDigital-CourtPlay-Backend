@@ -72,7 +72,6 @@ jobs:
             --image=${{ steps.image.outputs.TAG }} \
             --region=us-central1 \
             --platform=managed \
-            --service-account=github-runner-sa@${{ secrets.GCP_PROJECT_ID }}.iam.gserviceaccount.com \
             --port=8080 \
             --cpu=8 \
             --memory=16Gi \
