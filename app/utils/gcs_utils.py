@@ -9,8 +9,6 @@ from google.cloud import pubsub_v1
 storage_client = storage.Client()
 
 # Konfigurasi Log
-client = google.cloud.logging.Client()
-client.setup_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

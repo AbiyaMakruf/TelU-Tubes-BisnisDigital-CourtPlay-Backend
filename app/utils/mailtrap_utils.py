@@ -10,8 +10,6 @@ load_dotenv()
 MAILTRAP_TOKEN = os.getenv("MAILTRAP_TOKEN")
 
 # Konfigurasi Log
-client = google.cloud.logging.Client()
-client.setup_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

@@ -13,8 +13,6 @@ from ..utils.yolo_utils import inference_objectDetection, inference_playerKeyPoi
 from ..utils.mailtrap_utils import send_success_analysis_video
 
 # Konfigurasi Log
-client = google.cloud.logging.Client()
-client.setup_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

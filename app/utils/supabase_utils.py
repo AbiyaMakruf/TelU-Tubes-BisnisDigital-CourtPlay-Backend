@@ -14,8 +14,6 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Konfigurasi Log
-client = google.cloud.logging.Client()
-client.setup_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

@@ -12,8 +12,6 @@ OD_LOCK = threading.Lock()
 PKP_LOCK = threading.Lock()
 
 # Konfigurasi Log
-client = google.cloud.logging.Client()
-client.setup_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 

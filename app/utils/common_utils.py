@@ -11,8 +11,6 @@ from torch import cuda
 from .gcs_utils import download
 
 # Konfigurasi Log
-client = google.cloud.logging.Client()
-client.setup_logging()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
