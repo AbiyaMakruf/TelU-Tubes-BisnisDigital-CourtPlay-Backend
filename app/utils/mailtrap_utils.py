@@ -1,6 +1,7 @@
 import os
 import mailtrap as mt
 import logging
+import google.cloud.logging
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
 
@@ -9,8 +10,8 @@ load_dotenv()
 MAILTRAP_TOKEN = os.getenv("MAILTRAP_TOKEN")
 
 # Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 # Konfigurasi Jinja
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

@@ -1,6 +1,7 @@
 import os
 import logging
 import uuid
+import google.cloud.logging
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -13,9 +14,8 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def get(table_name, columns = "*", filters = None, is_single = None):
     """

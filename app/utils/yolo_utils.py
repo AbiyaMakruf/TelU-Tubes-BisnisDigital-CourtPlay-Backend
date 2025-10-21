@@ -2,17 +2,18 @@ import os
 import shutil
 import logging
 import threading
+import google.cloud.logging
 
 from .common_utils import convert_avi_to_mp4
 
-# Konfigurasi Log
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
-
-# Konfigurasi threading lock
+# Konfigurasi lock
 CONVERSION_LOCK = threading.Lock()
-OBJECT_DETECTION_LOCK = threading.Lock()
-PLAYER_KEYPOINT_LOCK = threading.Lock()
+OD_LOCK = threading.Lock()
+PKP_LOCK = threading.Lock()
+
+# Konfigurasi Log
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 def inference_objectDetection(user_id, project_id, model):
     project_path = os.path.join("inference",f"{user_id}", f"{project_id}")
@@ -24,9 +25,10 @@ def inference_objectDetection(user_id, project_id, model):
     # model = YOLO("models/objectDetection/objectDetection.pt")
 
     try:
-        logger.info("Starting inference object detection")
+        logger.info(f"Starting inference object detection. {project_id}")
         
-        with OBJECT_DETECTION_LOCK:
+        with OD_LOCK:
+            logger.info(f"🔒Acquired lock for object detection inference. {project_id}")
             results = model(
                 source=video_original_path,
                 stream=True,
@@ -40,13 +42,16 @@ def inference_objectDetection(user_id, project_id, model):
             for result in results:
                 result.save(filename=f"OD-{project_id}.png")
 
+            logger.info(f"🔓Released lock for object detection inference. {project_id}")
+
+        logger.info(f"Converting avi to mp4 format. {project_id}")
         with CONVERSION_LOCK:
-            logger.info(f"[{project_id}] Acquired lock for video conversion.")
+            logger.info(f"🔒Acquired lock for video conversion OD. {project_id}")
             convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
-            logger.info(f"[{project_id}] Released lock after video conversion.")
+            logger.info(f"🔓Released lock for video conversion OD. {project_id}")
         os.remove(f"OD-{project_id}.png")
 
-        logger.info("Success inference object detection")
+        logger.info(f"Success inference object detection. {project_id}")
         return video_mp4_format_path
     
     except Exception as e:
@@ -74,9 +79,10 @@ def inference_playerKeyPoint(user_id, project_id, model):
     }
 
     try:
-        logger.info("Starting inference player keypoint")
+        logger.info(f"Starting inference player keypoint. {project_id}")
 
-        with PLAYER_KEYPOINT_LOCK:
+        with PKP_LOCK:
+            logger.info(f"🔒Acquired lock for player keypoint inference. {project_id}")
             results = model(
                 source=video_original_path,
                 stream=True,
@@ -99,14 +105,16 @@ def inference_playerKeyPoint(user_id, project_id, model):
                         stroke_counts[class_name] += 1
 
                 result.save(filename=f"PKP-{project_id}.png")
+            logger.info(f"🔓Released lock for player keypoint inference. {project_id}")
 
+        logger.info(f"Converting avi to mp4 format. {project_id}")
         with CONVERSION_LOCK:
-            logger.info(f"[{project_id}] Acquired lock for video conversion.")
+            logger.info(f"🔒Acquired lock for video conversion PKP. {project_id}")
             convert_avi_to_mp4(video_avi_format_path, video_mp4_format_path)
-            logger.info(f"[{project_id}] Released lock after video conversion.")
+            logger.info(f"🔓Released lock for video conversion PKP. {project_id}")
         os.remove(f"PKP-{project_id}.png")
 
-        logger.info("Success inference player keypoint")
+        logger.info(f"Success inference player keypoint. {project_id}")
 
         return {
             'video_mp4_format_path':video_mp4_format_path,
@@ -121,9 +129,6 @@ def inference_playerKeyPoint(user_id, project_id, model):
         if os.path.exists(delete_path):
             shutil.rmtree(delete_path)
             
-        
-
-
 # # To Do
 # - Heatmap player
 # - Ball drop heatmap

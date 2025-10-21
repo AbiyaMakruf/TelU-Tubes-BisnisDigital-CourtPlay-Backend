@@ -5,11 +5,15 @@ import psutil
 import cpuinfo
 import platform
 import cv2
+import google.cloud.logging
 from torch import cuda
 
 from .gcs_utils import download
 
 # Konfigurasi Log
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
