@@ -17,7 +17,7 @@ docker run -it ^
   -e TOPIC_ID="courtplay-pubSub" ^
   -e SUBSCRIPTION_ID="inference" ^
   -e MAX_CONCURRENT_MESSAGES=1 ^
-  -e GEMINI_API_KEY=AIzaSyDt-KiCyuXWJcvYBJDvDsEoKaelUSu8Q3c ^
+  -e GEMINI_API_KEY=AIzaSyDt-KiCyuXWJcvYBJDvDsEoKaesadsadas ^ --> HARUS DIUBAH
   us-central1-docker.pkg.dev/courtplay-analytics-474615/courtplay-repo/backend-app:latest
 
 uvicorn app.main:app --reload
