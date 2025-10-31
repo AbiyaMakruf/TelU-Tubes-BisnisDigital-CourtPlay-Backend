@@ -2,7 +2,7 @@ name: Build, Push, and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, development-pubsub-push ]
   workflow_dispatch:
 
 jobs:

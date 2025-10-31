@@ -12,3 +12,5 @@ google-cloud-pubsub
 jinja2
 google-cloud-logging
 google-genai
+mplsports
+inference-gpu
