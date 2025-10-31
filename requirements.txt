@@ -15,3 +15,4 @@ google-genai
 mplsports
 inference-gpu
 supervision
+git+https://github.com/roboflow/sports.git
