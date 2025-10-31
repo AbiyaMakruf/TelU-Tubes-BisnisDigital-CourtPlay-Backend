@@ -75,7 +75,6 @@ def startup_event():
 def health_check():
     hardware_info = get_hardware_inference_info()
     
-    # Menambahkan line code untuk menguji coba seberapa cepat hasil caching github action
     return {
         "status": "ok", 
         "message": f"YOLO Inference Worker Running",
@@ -101,6 +100,18 @@ async def receive_pubsub_push(request: Request):
         logger.error(f"Error processing inference task: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
     
-
-# # To Do
-# - Ubah main.yml agar tidak menggunakan service account
+@app.post("/inference_local")
+async def inference_local(request: Request):
+    try:
+        payload = await request.json()
+        thread = threading.Thread(
+            target=process_inference_task,
+            args=(payload,),
+            daemon=True
+        )
+        thread.start()
+        logger.info(f"✅ Inference task started locally for project {payload.get('id')}")
+        return {"status": "ok", "message": "Local inference task started."}
+    except Exception as e:
+        logger.error(f"❌ Error processing local inference task: {e}", exc_info=True)
+        return {"status": "error", "message": str(e)}
