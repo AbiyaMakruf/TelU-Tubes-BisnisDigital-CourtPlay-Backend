@@ -1,16 +1,15 @@
-import json
 import logging
 import time
 import shutil
-import google.cloud.logging
 from pydantic import BaseModel, UUID4
 
 # Import from /utils
 from ..utils.common_utils import get_hardware_inference_info, get_original_video_name, extract_first_frame_as_thumbnail, get_video_duration
 from ..utils.supabase_utils import *
 from ..utils.gcs_utils import download, upload
-from ..utils.yolo_utils import inference_objectDetection, inference_playerKeyPoint
+from ..utils.yolo_utils import inference_objectDetection, inference_playerKeyPoint, inference_heatmapPlayer_v1, inference_heatmapPlayer_v2, inference_heatmapBall
 from ..utils.mailtrap_utils import send_success_analysis_video
+from .genai_services import *
 
 # Konfigurasi Log
 logger = logging.getLogger(__name__)
@@ -93,29 +92,43 @@ def process_inference_task(payload: dict):
         total_inference_time = detection_inference_time + keypoint_inference_time
         video_player_keypoint_path = keypoint_result['video_mp4_format_path']
         stroke_count = keypoint_result['stroke_counts']
+
+        # 7. Inference heatmap player
+        image_heatmapPlayer_path = inference_heatmapPlayer_v2(payload_data["user_id"], payload_data["project_id"], GLOBAL_MODELS["objectDetection"], GLOBAL_MODELS["courtKeyPoint"])
+        prompt = "You are a tennis instructor providing feedback on my match performance against my opponent. My opponent is positioned on the left side of the court, and I am on the right side. Analyze my heatmap as if you are reviewing the match — write your analysis in two sentences, not in bullet points."
+        genai_heatmapPlayer_understanding = image_understanding(image_heatmapPlayer_path, prompt)
         
-        # 7. Upload video to GCS
+        # 8. Inference ball heatmap
+        image_heatmapBall_path = inference_heatmapBall(payload_data["user_id"], payload_data["project_id"], GLOBAL_MODELS["objectDetection"], GLOBAL_MODELS["courtKeyPoint"])
+        prompt = "You are a tennis instructor providing feedback on my match performance against my opponent. My opponent is positioned on the left side of the court, and I am on the right side. Analyze my ball dropping heatmap as if you are reviewing the match — write your analysis in two sentences, not in bullet points."
+        genai_ballDroppings_understanding = image_understanding(image_heatmapBall_path, prompt)
+
+        # 9. Upload video to GCS
         video_object_detection_public_link = upload("courtplay-storage",video_object_detection_path,f"uploads/videos/{payload_data['user_id']}/{payload_data['project_details_id']}/objectDetection.mp4")
         video_player_keypoint_public_link = upload("courtplay-storage",video_player_keypoint_path,f"uploads/videos/{payload_data['user_id']}/{payload_data['project_details_id']}/playerKeyPoint.mp4")
 
+        #10. Upload image to GCS
+        image_heatmapPlayer_public_link = upload("courtplay-storage",image_heatmapPlayer_path,f"uploads/images/{payload_data['user_id']}/{payload_data['project_details_id']}/heatmapPlayer.png")
+        image_ball_droppings_public_link = upload("courtplay-storage",image_heatmapBall_path,f"uploads/images/{payload_data['user_id']}/{payload_data['project_details_id']}/ballDroppings.png")
+
         # Placeholder untuk To Do
         video_court_keypoint_public_link = "IN DEVELOPMENT"
-        image_heatmap_player_public_link = "IN DEVELOPMENT"
-        image_ball_droppings_public_link = "IN DEVELOPMENT"
 
-        # 8. Update data in Supabase
+        # 11. Update data in Supabase
         data_update_project_details = {
             "link_video_object_detections":video_object_detection_public_link,
             "link_video_player_keypoints": video_player_keypoint_public_link,
             "link_video_court_keypoints": video_court_keypoint_public_link,
             "link_image_ball_droppings": image_ball_droppings_public_link,
-            "link_image_heatmap_player": image_heatmap_player_public_link,
+            "link_image_heatmap_player": image_heatmapPlayer_public_link,
             "ready_position_count":stroke_count["Ready_Position"],
             "forehand_count":stroke_count["Forehand"],
             "backhand_count":stroke_count["Backhand"],
             "serve_count":stroke_count["Serve"],
             "video_duration":int(video_duration),
             "video_processing_time":int(total_inference_time),
+            "genai_heatmap_player_understanding": genai_heatmapPlayer_understanding,
+            "genai_ball_droppings_understanding": genai_ballDroppings_understanding,
             "updated_at":"now()"
         }
 
