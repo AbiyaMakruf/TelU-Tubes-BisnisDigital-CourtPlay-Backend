@@ -2,7 +2,7 @@ name: Build, Push, and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ main, development-pubsub-push ]
+    branches: [ main, development-pubsub-push, development-pubsub-pull ]
   workflow_dispatch:
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --- Setup Google Cloud ---
+      # --- Setup Google Cloud ---  
       - name: Create GCP credentials file
         run: |
           echo '${{ secrets.GCP_SA_KEY }}' > $HOME/gcp-key.json
