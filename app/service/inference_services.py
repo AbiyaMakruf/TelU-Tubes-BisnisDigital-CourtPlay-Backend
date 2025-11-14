@@ -233,9 +233,7 @@ def process_inference_task(payload: dict) -> None:
             uid, pid, GLOBAL_MODELS["objectDetection"], GLOBAL_MODELS["courtKeyPoint"]
         )
         prompt_player = (
-            "You are a tennis instructor providing feedback on my match performance against my opponent. "
-            "My opponent is positioned on the left side of the court, and I am on the right side. "
-            "Analyze my heatmap as if you are reviewing the match — write your analysis in two sentences, not in bullet points."
+            "You are a tennis instructor providing feedback on my match performance against my opponent. My opponent is positioned at the top of the court, and I am positioned at the bottom of the court. Analyze my heatmap as if you are reviewing the match, and provide your analysis in two sentences, not in bullet points."
         )
         genai_heatmapPlayer_understanding = image_understanding(image_heatmapPlayer_path, prompt_player)
 
@@ -260,9 +258,7 @@ def process_inference_task(payload: dict) -> None:
             uid, pid, GLOBAL_MODELS["objectDetection"], GLOBAL_MODELS["courtKeyPoint"]
         )
         prompt_ball = (
-            "You are a tennis instructor providing feedback on my match performance against my opponent. "
-            "My opponent is positioned on the left side of the court, and I am on the right side. "
-            "Analyze my ball dropping heatmap as if you are reviewing the match — write your analysis in two sentences, not in bullet points."
+            "You are a tennis instructor providing feedback on my match performance against my opponent. My opponent is positioned at the top of the court, and I am positioned at the bottom of the court. Analyze the ball drop heatmap, focusing on where the ball makes contact with the court, and provide your analysis in two sentences, not in bullet points."
         )
         genai_ballDroppings_understanding = image_understanding(image_heatmapBall_path, prompt_ball)
 
