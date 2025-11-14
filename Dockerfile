@@ -1,4 +1,4 @@
-FROM nvidia/cuda:13.0.1-cudnn-runtime-ubuntu24.04
+FROM nvidia/cuda:12.1.1-cudnn-runtime-ubuntu22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /app
@@ -19,10 +19,10 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 ENV PORT=8080
 ENV PYTHONUNBUFFERED=1
 
-COPY requirements.txt .
-RUN python3 -m pip install --no-cache-dir -r requirements.txt --break-system-packages \
-    && python3 -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu126 --break-system-packages
+RUN python3 -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu126 --break-system-packages
 
+COPY requirements.txt .
+RUN python3 -m pip install --no-cache-dir -r requirements.txt --break-system-packages
 COPY app/ ./app
 
 CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
