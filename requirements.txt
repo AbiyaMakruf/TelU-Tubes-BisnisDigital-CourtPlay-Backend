@@ -15,4 +15,12 @@ google-genai
 mplsports
 inference-gpu
 supervision
+matplotlib
+scenedetect
+scipy
+pandas
+sympy
+tqdm
+opencv_python
+catboost
 git+https://github.com/roboflow/sports.git

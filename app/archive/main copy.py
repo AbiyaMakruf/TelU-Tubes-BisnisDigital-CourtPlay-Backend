@@ -57,19 +57,19 @@ def startup_event():
     except Exception as e:
         logger.error(f"Failed to download model. {e}")
 
-    # global GLOBAL_MODELS
+    global GLOBAL_MODELS
     try:
-        # GLOBAL_MODELS["objectDetection"] = YOLO("models/objectDetection/objectDetection.pt")
-        # logger.info("Object Detection Model Loaded.")
+        GLOBAL_MODELS["objectDetection"] = YOLO("models/objectDetection/objectDetection.pt")
+        logger.info("Object Detection Model Loaded.")
 
-        # GLOBAL_MODELS["playerKeyPoint"] = YOLO("models/playerKeyPoint/playerKeyPoint.pt")
-        # logger.info("Player KeyPoint Model Loaded.")
+        GLOBAL_MODELS["playerKeyPoint"] = YOLO("models/playerKeyPoint/playerKeyPoint.pt")
+        logger.info("Player KeyPoint Model Loaded.")
         
-        # GLOBAL_MODELS["courtKeyPoint"] = YOLO("models/courtKeyPoint/courtKeyPoint.pt")
-        # logger.info("Court KeyPoint Model Loaded.")
+        GLOBAL_MODELS["courtKeyPoint"] = YOLO("models/courtKeyPoint/courtKeyPoint.pt")
+        logger.info("Court KeyPoint Model Loaded.")
         
-        # set_global_models(GLOBAL_MODELS)
-        # logger.info("All models successfully loaded to memory/VRAM.")
+        set_global_models(GLOBAL_MODELS)
+        logger.info("All models successfully loaded to memory/VRAM.")
 
         thread = threading.Thread(
             # target=pull_and_process, 

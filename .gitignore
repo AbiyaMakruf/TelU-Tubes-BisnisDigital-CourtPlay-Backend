@@ -8,5 +8,6 @@ courtplay-analytics-474615-92b2bbfdc547.json
 __pycache__/
 *.$py.class
 *.png
-
+app/gcp-key.json
+models/
 
