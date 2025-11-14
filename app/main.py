@@ -75,11 +75,6 @@ def pull_and_process(project_id: str, subscription_id: str):
             payload.pop(meta_field, None)
 
 
-
-        # encoded_data = pubsub_message.message.get("data")
-        # decoded_data = base64.b64decode(encoded_data).decode("utf-8")
-        # payload = json.loads(decoded_data)
-
         subscriber.acknowledge(
             request={
                 "subscription": subscription_path,
