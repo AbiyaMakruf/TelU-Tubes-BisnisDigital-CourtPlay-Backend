@@ -19,7 +19,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility
 ENV PORT=8080
 ENV PYTHONUNBUFFERED=1
 
-RUN python3 -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu130 --break-system-packages
+RUN python3 -m pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cu126 --break-system-packages
 
 COPY requirements.txt .
 RUN python3 -m pip install --no-cache-dir -r requirements.txt --break-system-packages
