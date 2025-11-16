@@ -13,6 +13,7 @@ from ..utils.common_utils import (
     extract_first_frame_as_thumbnail,
     get_video_duration,
 )
+import cv2
 from ..utils_v2.supabase_utils import get, update
 from ..utils_v2.gcs_utils import download, upload
 from ..utils_v2.yolo_utils import inference_playerKeyPoint
@@ -188,6 +189,7 @@ def process_inference_task(payload: dict) -> None:
                 analytics_artifacts.get("heatmap_player_image"),
                 f"uploads/images/{uid}/{pdetail_id}/heatmap_player.png",
             ),
+            "heatmap_player_image_horizontal": None,
             "minimap_ball_image": _upload_analytics(
                 analytics_artifacts.get("minimap_ball_image"),
                 f"uploads/images/{uid}/{pdetail_id}/minimap_ball.png",
@@ -207,6 +209,23 @@ def process_inference_task(payload: dict) -> None:
 
         heatmap_player_local = analytics_artifacts.get("heatmap_player_image")
         heatmap_ball_local = analytics_artifacts.get("heatmap_ball_image")
+        heatmap_player_horizontal_local = None
+        if heatmap_player_local and os.path.exists(heatmap_player_local):
+            try:
+                heatmap_img = cv2.imread(heatmap_player_local)
+                if heatmap_img is not None:
+                    rotated_img = cv2.rotate(heatmap_img, cv2.ROTATE_90_CLOCKWISE)
+                    heatmap_player_horizontal_local = heatmap_player_local.replace(
+                        ".png", "_horizontal.png"
+                    )
+                cv2.imwrite(heatmap_player_horizontal_local, rotated_img)
+            except Exception as e:
+                logger.error(f"Failed to rotate heatmap player image: {e}")
+        if heatmap_player_horizontal_local and os.path.exists(heatmap_player_horizontal_local):
+            analytics_uploads["heatmap_player_image_horizontal"] = _upload_analytics(
+                heatmap_player_horizontal_local,
+                f"uploads/images/{uid}/{pdetail_id}/heatmap_player_horizontal.png",
+            )
 
         try:
             genai_heatmapPlayer_understanding = (
@@ -235,6 +254,10 @@ def process_inference_task(payload: dict) -> None:
             analytics_update_payload["link_video_ball_droppings"] = analytics_uploads["minimap_ball_video"]
         if analytics_uploads["heatmap_player_image"]:
             analytics_update_payload["link_image_heatmap_player"] = analytics_uploads["heatmap_player_image"]
+        if analytics_uploads["heatmap_player_image_horizontal"]:
+            analytics_update_payload["link_image_heatmap_player_horizontal"] = analytics_uploads[
+                "heatmap_player_image_horizontal"
+            ]
         if analytics_uploads["minimap_ball_image"]:
             analytics_update_payload["link_image_ball_droppings"] = analytics_uploads["minimap_ball_image"]
         if analytics_uploads["heatmap_ball_image"]:
