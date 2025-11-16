@@ -36,13 +36,17 @@ def send_success_analysis_video(receiver_email, context):
     """
     Fungsi umum untuk mengirim email menggunakan Mailtrap.
 
-    context should contains:
+    context should contain:
     {
-        username
-        project_name
-        video_duration
-        upload_date
-        report_url
+        username,
+        project_name,
+        video_duration,
+        upload_date,
+        report_url,
+        heatmap_player_image_url (optional),
+        heatmap_player_description (optional),
+        ball_drop_image_url (optional),
+        ball_drop_description (optional)
     }
     """
     try:

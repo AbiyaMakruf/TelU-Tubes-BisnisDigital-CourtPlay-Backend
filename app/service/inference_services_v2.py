@@ -17,7 +17,7 @@ from ..utils_v2.supabase_utils import get, update
 from ..utils_v2.gcs_utils import download, upload
 from ..utils_v2.yolo_utils import inference_playerKeyPoint
 from ..utils_v2.combine_pipeline import start_inference_pipeline
-from ..utils.mailtrap_utils import send_success_analysis_video
+from ..utils_v2.mailtrap_utils import send_success_analysis_video
 from .genai_services import image_understanding
 
 # ---------------------------------------------------------------------
@@ -296,6 +296,10 @@ def process_inference_task(payload: dict) -> None:
             "video_duration": video_duration,
             "upload_date": project_data[0]["upload_date"],
             "report_url": f"courtplay.my.id/analytics/{pid}",
+            "heatmap_player_image_url": analytics_uploads.get("heatmap_player_image"),
+            "heatmap_player_description": genai_heatmapPlayer_understanding,
+            "ball_drop_image_url": analytics_uploads.get("minimap_ball_image"),
+            "ball_drop_description": genai_ballDroppings_understanding,
         }
 
         if send_success_analysis_video(user_data[0]["email"], context_email):
@@ -311,7 +315,6 @@ def process_inference_task(payload: dict) -> None:
         logger.error(f"Error during processing Project ID {pid}: {e}")
         raise
     finally:
-        # # Bersihkan workdir
-        # if os.path.exists(workdir):
-        #     shutil.rmtree(workdir)
-        pass
+        # Bersihkan workdir
+        if os.path.exists(workdir):
+            shutil.rmtree(workdir)
