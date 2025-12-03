@@ -1,0 +1,58 @@
+# Project Overview: CourtPlay - AI Tennis Analytics Backend
+
+## 1. Project Summary
+CourtPlay is an advanced AI-powered backend system designed to analyze tennis match footage. It transforms raw video recordings into professional-grade sports analytics. By using computer vision and deep learning, it tracks the ball, players, and court lines to generate insights like heatmaps, stroke counts, and movement patterns.
+
+## 2. Core Functionality (What it does)
+- **Automated Video Analysis:** Users upload a tennis video, and the system processes it automatically.
+- **Object Tracking:** Detects and tracks the tennis ball and players frame-by-frame.
+- **Court Mapping (Homography):** Maps the 3D video perspective onto a 2D top-down court view.
+- **Stroke Recognition:** Classifies player moves (Forehand, Backhand, Serve, Ready Position).
+- **Visual Analytics:**
+  - **Heatmaps:** Visualizes player coverage and ball landing zones.
+  - **Minimaps:** Recreates the game on a 2D virtual court.
+  - **Ball Drop Overlay:** Marks exactly where the ball bounced on the original video.
+- **Reporting:** Sends detailed analysis reports via email.
+
+## 3. Technology Stack (The "How")
+
+### A. Artificial Intelligence & Computer Vision
+- **Python:** Primary programming language.
+- **YOLOv8 (Ultralytics):** Used for Object Detection (players) and Keypoint Detection (body pose & court corners).
+- **PyTorch:** Deep learning framework powering the models.
+- **TrackNet:** Specialized neural network for high-speed tennis ball tracking.
+- **OpenCV:** Used for image processing, perspective transformation (homography), and video rendering.
+- **SciPy:** Used for Gaussian KDE (Kernel Density Estimation) to generate heatmaps.
+
+### B. Backend & API
+- **FastAPI:** High-performance web framework for handling inference requests.
+- **Pydantic:** Data validation.
+- **Docker:** Containerization for consistent deployment.
+
+### C. Cloud & Infrastructure
+- **Google Cloud Platform (GCP):**
+  - **Cloud Storage (GCS):** Stores raw videos, models, and processed results.
+  - **Pub/Sub:** Manages asynchronous message queues for processing tasks (worker pattern).
+- **Supabase (PostgreSQL):** Database for storing user data, project details, and analytics metadata.
+
+### D. DevOps & Monitoring
+- **Prometheus:** Collects metrics (inference time, success/failure rates).
+- **Grafana:** Visualizes system health and performance dashboards.
+- **Mailtrap:** Email delivery service for analysis reports.
+
+## 4. Data Flow (For Infographic Visualization)
+1.  **Input:** User uploads video -> Saved to GCS -> Trigger via Pub/Sub.
+2.  **Processing (The "Black Box"):**
+    -   *Step 1:* Scene Detection (split video).
+    -   *Step 2:* AI Inference (YOLO for players/court, TrackNet for ball).
+    -   *Step 3:* Homography (Math to flatten the court view).
+    -   *Step 4:* Analytics Calculation (Speed, counts, heatmaps).
+3.  **Output:** Processed Video (with overlays), Heatmap Images, JSON Statistics -> Saved to DB -> Email sent to User.
+
+## 5. Key Visual Keywords for Infographic
+-   Computer Vision
+-   Tennis Court
+-   Heatmap
+-   Neural Networks
+-   Real-time Tracking
+-   Cloud Architecture

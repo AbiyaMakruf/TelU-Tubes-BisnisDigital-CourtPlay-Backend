@@ -354,6 +354,7 @@ def combine_stream(frames, scenes, bounces, ball_track, homography_matrices, kps
             ball_heat_dirty = False
             ball_heat_sigma = max(0.1, BALL_HEAT_GAUSSIAN_SIGMA / HEATMAP_DOWNSCALE)
 
+        bounce_history_court = []
         for idx in range(scene_start, scene_end):
             frame_profile = {}
             frame_start = perf_counter()
@@ -363,6 +364,21 @@ def combine_stream(frames, scenes, bounces, ball_track, homography_matrices, kps
             if want_combined:
                 section_start = perf_counter()
                 frame = _fetch_frame(frames, idx)
+
+                # Draw past bounces on the original frame
+                if inv_mat is not None and bounce_history_court:
+                    try:
+                        mat_inv = np.linalg.inv(inv_mat)
+                        pts_court = np.array(bounce_history_court, dtype=np.float32).reshape(-1, 1, 2)
+                        pts_frame = cv2.perspectiveTransform(pts_court, mat_inv)
+                        for pt in pts_frame:
+                            bx, by = int(pt[0, 0]), int(pt[0, 1])
+                            # Draw a marker for the bounce (e.g., a small yellow circle)
+                            cv2.circle(frame, (bx, by), radius=5, color=(0, 255, 255), thickness=-1)
+                            cv2.circle(frame, (bx, by), radius=5, color=(0, 0, 0), thickness=1)
+                    except np.linalg.LinAlgError:
+                        pass
+
                 frame = _draw_ball(frame, ball_track, idx, draw_trace, trace)
                 frame = _draw_court_keypoints(frame, kps_court[idx] if idx < len(kps_court) else None)
                 frame_profile["frame_draw"] = perf_counter() - section_start
@@ -370,6 +386,7 @@ def combine_stream(frames, scenes, bounces, ball_track, homography_matrices, kps
             if idx in bounces and inv_mat is not None and ball_track[idx][0]:
                 section_start = perf_counter()
                 ball_point = _project_point(ball_track[idx], inv_mat, court_template.shape[:2])
+                bounce_history_court.append(ball_point)
                 if want_combined and court_base is not None:
                     cv2.circle(court_base, ball_point, radius=0, color=(0, 255, 255), thickness=50)
                 if want_minimap_ball and court_ball is not None:
