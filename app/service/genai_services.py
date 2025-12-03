@@ -10,7 +10,7 @@ client = genai.Client()
 
 def text_generation(prompt):
     response = client.models.generate_content(
-        model="gemini-2.5-flash", contents=prompt
+        model="gemini-2.5-flash-lite", contents=prompt
     )
     return response.text
 
@@ -20,7 +20,7 @@ def image_understanding(image_path, prompt):
 
     client = genai.Client()
     response = client.models.generate_content(
-    model='gemini-2.5-flash',
+    model='gemini-2.5-flash-lite',
     contents=[
         types.Part.from_bytes(
         data=image_bytes,
