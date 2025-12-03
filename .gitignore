@@ -1,5 +1,4 @@
 *.pt
-*.mp4
 *.avi
 .env
 .env.prod
@@ -7,7 +6,6 @@ courtplay-analytics-474615-92b2bbfdc547.json
 *.pyc
 __pycache__/
 *.$py.class
-*.png
 app/gcp-key.json
 models/
 inference/
